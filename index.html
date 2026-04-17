@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Nexus — Discover, explore, and save your favorite video games." />
+    <title>Nexus — Game Discovery</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+
+    <!-- ═══════════════════════════════════════════
+         OVERLAY — shared backdrop for panel & drawer
+    ═══════════════════════════════════════════ -->
+    <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+
+    <!-- ═══════════════════════════════════════════
+         NAVBAR
+    ═══════════════════════════════════════════ -->
+    <header class="navbar" role="banner">
+      <div class="navbar__inner">
+
+        <!-- Logo -->
+        <a href="#" class="navbar__logo" aria-label="Nexus home">
+          <span class="navbar__logo-icon" aria-hidden="true">✦</span>
+          <span class="navbar__logo-text">NEXUS</span>
+        </a>
+
+        <!-- Primary nav links -->
+        <nav class="navbar__nav" aria-label="Primary navigation">
+          <ul class="navbar__nav-list" role="list">
+            <li><a href="#discover" class="navbar__nav-link navbar__nav-link--active">Discover</a></li>
+            <li><a href="#my-list-drawer" class="navbar__nav-link" id="nav-mylist-link">My List</a></li>
+          </ul>
+        </nav>
+
+        <!-- Search bar -->
+        <div class="navbar__search" role="search">
+          <label for="search-input" class="sr-only">Search games</label>
+          <span class="navbar__search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input
+            type="search"
+            id="search-input"
+            class="navbar__search-input"
+            placeholder="Search games…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search games"
+          />
+          <button class="navbar__search-clear" id="search-clear-btn" aria-label="Clear search" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- My List button with live count badge -->
+        <button class="navbar__mylist-btn" id="mylist-btn" aria-label="Open My List" aria-expanded="false" aria-controls="my-list-drawer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="navbar__mylist-label">My List</span>
+          <span class="navbar__mylist-count" id="mylist-count" aria-live="polite" hidden>0</span>
+        </button>
+
+        <!-- Mobile menu toggle -->
+        <button class="navbar__menu-toggle" id="menu-toggle-btn" aria-label="Toggle menu" aria-expanded="false" aria-controls="navbar__nav">
+          <span class="navbar__menu-bar"></span>
+          <span class="navbar__menu-bar"></span>
+          <span class="navbar__menu-bar"></span>
+        </button>
+
+      </div>
+    </header>
+
+
+    <!-- ═══════════════════════════════════════════
+         HERO SECTION — cinematic featured game carousel
+    ═══════════════════════════════════════════ -->
+    <section class="hero" id="hero" aria-label="Featured games">
+
+      <!-- Background art (blurred, swapped by JS) -->
+      <div class="hero__backdrop" id="hero-backdrop" aria-hidden="true">
+        <div class="hero__backdrop-img" id="hero-backdrop-img"></div>
+        <div class="hero__backdrop-gradient"></div>
+      </div>
+
+      <!-- Hero content -->
+      <div class="hero__content">
+        <div class="hero__meta">
+          <span class="hero__eyebrow" id="hero-eyebrow">Featured Game</span>
+        </div>
+
+        <h1 class="hero__title" id="hero-title">
+          <span class="hero__title-text">Loading…</span>
+        </h1>
+
+        <p class="hero__description" id="hero-description"></p>
+
+        <div class="hero__actions">
+          <a href="#discover" class="hero__cta-btn" id="hero-cta-btn">
+            <span>Explore Games</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+          <button class="hero__detail-btn" id="hero-detail-btn" aria-label="View game details">
+            View Details
+          </button>
+        </div>
+
+        <!-- Rating + platform info strip -->
+        <div class="hero__info-strip" id="hero-info-strip">
+          <div class="hero__rating" id="hero-rating">
+            <span class="hero__rating-score" id="hero-rating-score">—</span>
+            <span class="hero__rating-label">Metacritic</span>
+          </div>
+          <div class="hero__divider" aria-hidden="true"></div>
+          <div class="hero__platforms" id="hero-platforms" aria-label="Platforms"></div>
+          <div class="hero__divider" aria-hidden="true"></div>
+          <div class="hero__genre" id="hero-genre"></div>
+        </div>
+      </div>
+
+      <!-- Cover art -->
+      <div class="hero__cover-wrap" aria-hidden="true">
+        <img class="hero__cover-img" id="hero-cover-img" src="" alt="" />
+        <div class="hero__cover-glow" aria-hidden="true"></div>
+      </div>
+
+      <!-- Carousel controls -->
+      <div class="hero__carousel-controls" role="group" aria-label="Featured game carousel">
+        <button class="hero__carousel-prev" id="hero-prev-btn" aria-label="Previous featured game">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div class="hero__carousel-dots" id="hero-dots" role="tablist" aria-label="Featured game slides"></div>
+        <button class="hero__carousel-next" id="hero-next-btn" aria-label="Next featured game">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Auto-advance progress bar -->
+      <div class="hero__progress-bar" aria-hidden="true">
+        <div class="hero__progress-fill" id="hero-progress-fill"></div>
+      </div>
+
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════
+         MAIN — sidebar + game grid
+    ═══════════════════════════════════════════ -->
+    <main class="main" id="discover">
+
+      <!-- ─── FILTER SIDEBAR ─── -->
+      <aside class="sidebar" id="sidebar" aria-label="Game filters">
+
+        <div class="sidebar__header">
+          <h2 class="sidebar__title">Filters</h2>
+          <button class="sidebar__clear-btn" id="clear-filters-btn" aria-label="Clear all filters" hidden>
+            Clear all
+          </button>
+        </div>
+
+        <!-- Active filter pills -->
+        <div class="sidebar__active-filters" id="active-filters" aria-label="Active filters" aria-live="polite"></div>
+
+        <form class="sidebar__form" id="filter-form" novalidate>
+
+          <!-- Genre -->
+          <fieldset class="sidebar__fieldset">
+            <legend class="sidebar__legend">Genre</legend>
+            <div class="sidebar__select-wrap">
+              <select class="sidebar__select" id="filter-genre" name="genre" aria-label="Filter by genre">
+                <option value="">All Genres</option>
+                <option value="action">Action</option>
+                <option value="indie">Indie</option>
+                <option value="adventure">Adventure</option>
+                <option value="role-playing-games-rpg">RPG</option>
+                <option value="strategy">Strategy</option>
+                <option value="shooter">Shooter</option>
+                <option value="casual">Casual</option>
+                <option value="simulation">Simulation</option>
+                <option value="puzzle">Puzzle</option>
+                <option value="arcade">Arcade</option>
+                <option value="platformer">Platformer</option>
+                <option value="racing">Racing</option>
+                <option value="sports">Sports</option>
+                <option value="massively-multiplayer">MMO</option>
+                <option value="family">Family</option>
+                <option value="fighting">Fighting</option>
+                <option value="horror">Horror</option>
+              </select>
+              <span class="sidebar__select-arrow" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </fieldset>
+
+          <!-- Platform -->
+          <fieldset class="sidebar__fieldset">
+            <legend class="sidebar__legend">Platform</legend>
+            <div class="sidebar__select-wrap">
+              <select class="sidebar__select" id="filter-platform" name="platform" aria-label="Filter by platform">
+                <option value="">All Platforms</option>
+                <option value="4">PC</option>
+                <option value="187">PlayStation 5</option>
+                <option value="18">PlayStation 4</option>
+                <option value="1">Xbox One</option>
+                <option value="186">Xbox Series X/S</option>
+                <option value="7">Nintendo Switch</option>
+                <option value="3">iOS</option>
+                <option value="21">Android</option>
+              </select>
+              <span class="sidebar__select-arrow" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </fieldset>
+
+          <!-- Metacritic Rating -->
+          <fieldset class="sidebar__fieldset">
+            <legend class="sidebar__legend">
+              Min Metacritic Score
+              <span class="sidebar__range-value" id="rating-range-display">Any</span>
+            </legend>
+            <div class="sidebar__range-wrap">
+              <input
+                type="range"
+                id="filter-rating"
+                name="rating"
+                class="sidebar__range"
+                min="0"
+                max="100"
+                step="5"
+                value="0"
+                aria-label="Minimum Metacritic score"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              />
+              <div class="sidebar__range-labels" aria-hidden="true">
+                <span>0</span>
+                <span>50</span>
+                <span>100</span>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Release Year -->
+          <fieldset class="sidebar__fieldset">
+            <legend class="sidebar__legend">Release Year</legend>
+            <div class="sidebar__year-row">
+              <div class="sidebar__select-wrap sidebar__select-wrap--half">
+                <select class="sidebar__select" id="filter-year-from" name="year-from" aria-label="Release year from">
+                  <option value="">From</option>
+                  <!-- JS populates options -->
+                </select>
+                <span class="sidebar__select-arrow" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </span>
+              </div>
+              <span class="sidebar__year-dash" aria-hidden="true">—</span>
+              <div class="sidebar__select-wrap sidebar__select-wrap--half">
+                <select class="sidebar__select" id="filter-year-to" name="year-to" aria-label="Release year to">
+                  <option value="">To</option>
+                  <!-- JS populates options -->
+                </select>
+                <span class="sidebar__select-arrow" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Ordering -->
+          <fieldset class="sidebar__fieldset">
+            <legend class="sidebar__legend">Sort By</legend>
+            <div class="sidebar__select-wrap">
+              <select class="sidebar__select" id="filter-ordering" name="ordering" aria-label="Sort games by">
+                <option value="-metacritic">Metacritic (High → Low)</option>
+                <option value="-rating">Rating (High → Low)</option>
+                <option value="-released">Newest First</option>
+                <option value="released">Oldest First</option>
+                <option value="-added">Most Added</option>
+                <option value="name">Name (A → Z)</option>
+              </select>
+              <span class="sidebar__select-arrow" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </fieldset>
+
+          <!-- Multiplayer toggle -->
+          <fieldset class="sidebar__fieldset">
+            <legend class="sidebar__legend">Tags</legend>
+            <label class="sidebar__toggle-label" for="filter-multiplayer">
+              <span class="sidebar__toggle-text">Multiplayer Only</span>
+              <div class="sidebar__toggle-wrap">
+                <input
+                  type="checkbox"
+                  id="filter-multiplayer"
+                  name="multiplayer"
+                  class="sidebar__toggle-input"
+                  role="switch"
+                  aria-checked="false"
+                />
+                <span class="sidebar__toggle-track" aria-hidden="true">
+                  <span class="sidebar__toggle-thumb"></span>
+                </span>
+              </div>
+            </label>
+          </fieldset>
+
+        </form>
+      </aside>
+
+
+      <!-- ─── GAME GRID SECTION ─── -->
+      <section class="game-section" aria-label="Game results">
+
+        <!-- Results header -->
+        <div class="game-section__header">
+          <div class="game-section__results-info">
+            <h2 class="game-section__heading" id="results-heading">Discover Games</h2>
+            <span class="game-section__count" id="results-count" aria-live="polite"></span>
+          </div>
+
+          <!-- Mobile filter toggle -->
+          <button class="game-section__filter-toggle" id="mobile-filter-btn" aria-label="Toggle filters" aria-expanded="false" aria-controls="sidebar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+            </svg>
+            Filters
+          </button>
+        </div>
+
+        <!-- Game card grid -->
+        <div
+          class="game-grid"
+          id="game-grid"
+          role="list"
+          aria-label="Game cards"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <!-- Skeleton cards injected by JS on load -->
+          <!-- Real game cards injected by JS after fetch -->
+        </div>
+
+        <!-- Empty state (shown by JS) -->
+        <div class="empty-state" id="empty-state" hidden aria-live="polite">
+          <div class="empty-state__icon" aria-hidden="true">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </div>
+          <h3 class="empty-state__title">No games found</h3>
+          <p class="empty-state__message">Try adjusting your search or filters.</p>
+          <button class="empty-state__reset-btn" id="reset-all-btn">Reset Everything</button>
+        </div>
+
+        <!-- Error state (shown by JS) -->
+        <div class="error-state" id="error-state" hidden aria-live="assertive">
+          <div class="error-state__icon" aria-hidden="true">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h3 class="error-state__title">Something went wrong</h3>
+          <p class="error-state__message" id="error-message">Failed to load games. Check your connection and try again.</p>
+          <button class="error-state__retry-btn" id="retry-btn">Try Again</button>
+        </div>
+
+        <!-- Load More button -->
+        <div class="load-more-wrap" id="load-more-wrap" hidden>
+          <button class="load-more-btn" id="load-more-btn" aria-label="Load more games">
+            <span class="load-more-btn__text">Load More</span>
+            <span class="load-more-btn__spinner" aria-hidden="true" hidden></span>
+          </button>
+        </div>
+
+      </section>
+    </main>
+
+
+    <!-- ═══════════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════════ -->
+    <footer class="footer" role="contentinfo">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="footer__logo-icon" aria-hidden="true">✦</span>
+          <span class="footer__logo-text">NEXUS</span>
+          <p class="footer__tagline">Discover your next obsession.</p>
+        </div>
+        <p class="footer__attribution">
+          Game data provided by
+          <a href="https://rawg.io" target="_blank" rel="noopener noreferrer" class="footer__link">RAWG.io</a>
+        </p>
+      </div>
+    </footer>
+
+
+    <!-- ═══════════════════════════════════════════
+         GAME DETAIL PANEL — slides in from right
+    ═══════════════════════════════════════════ -->
+    <aside
+      class="detail-panel"
+      id="detail-panel"
+      role="complementary"
+      aria-label="Game details"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div class="detail-panel__inner">
+
+        <!-- Close button -->
+        <button class="detail-panel__close-btn" id="panel-close-btn" aria-label="Close game details">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <!-- Screenshot carousel -->
+        <div class="detail-panel__screenshots" id="panel-screenshots" aria-label="Game screenshots">
+          <div class="detail-panel__screenshots-track" id="panel-screenshots-track">
+            <!-- Screenshot images injected by JS -->
+          </div>
+          <button class="detail-panel__screenshot-prev" id="screenshot-prev-btn" aria-label="Previous screenshot" hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <button class="detail-panel__screenshot-next" id="screenshot-next-btn" aria-label="Next screenshot" hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+          <div class="detail-panel__screenshot-dots" id="screenshot-dots" aria-label="Screenshot position" role="tablist"></div>
+        </div>
+
+        <!-- Panel body -->
+        <div class="detail-panel__body">
+
+          <!-- Title + save button -->
+          <div class="detail-panel__title-row">
+            <h2 class="detail-panel__title" id="panel-title">Loading…</h2>
+            <button class="detail-panel__save-btn" id="panel-save-btn" aria-label="Add to My List" aria-pressed="false">
+              <svg class="detail-panel__save-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="detail-panel__save-label">Add to My List</span>
+            </button>
+          </div>
+
+          <!-- Ratings row -->
+          <div class="detail-panel__ratings">
+            <div class="detail-panel__metacritic" id="panel-metacritic" aria-label="Metacritic score">
+              <span class="detail-panel__metacritic-score" id="panel-metacritic-score">—</span>
+              <span class="detail-panel__metacritic-label">Metacritic</span>
+            </div>
+            <div class="detail-panel__rating-stars" id="panel-stars" aria-label="User rating" role="img"></div>
+            <span class="detail-panel__rating-text" id="panel-rating-text"></span>
+          </div>
+
+          <!-- Meta chips row -->
+          <div class="detail-panel__chips" id="panel-chips" aria-label="Game information"></div>
+
+          <!-- Description -->
+          <div class="detail-panel__description-wrap">
+            <h3 class="detail-panel__section-label">About</h3>
+            <div class="detail-panel__description" id="panel-description">
+              <p class="detail-panel__description-text" id="panel-description-text"></p>
+              <button class="detail-panel__read-more-btn" id="panel-read-more-btn" hidden>Read more</button>
+            </div>
+          </div>
+
+          <!-- Platforms -->
+          <div class="detail-panel__platforms-section">
+            <h3 class="detail-panel__section-label">Platforms</h3>
+            <div class="detail-panel__platform-list" id="panel-platform-list" aria-label="Available platforms"></div>
+          </div>
+
+          <!-- Genres -->
+          <div class="detail-panel__genres-section" id="panel-genres-section">
+            <h3 class="detail-panel__section-label">Genres</h3>
+            <div class="detail-panel__genre-tags" id="panel-genre-tags"></div>
+          </div>
+
+          <!-- Details table -->
+          <div class="detail-panel__details-section">
+            <h3 class="detail-panel__section-label">Details</h3>
+            <dl class="detail-panel__details-list" id="panel-details-list">
+              <!-- dt/dd pairs injected by JS -->
+            </dl>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+
+
+    <!-- ═══════════════════════════════════════════
+         MY LIST DRAWER — slides in from left
+    ═══════════════════════════════════════════ -->
+    <aside
+      class="mylist-drawer"
+      id="my-list-drawer"
+      role="complementary"
+      aria-label="My saved games list"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div class="mylist-drawer__inner">
+
+        <!-- Drawer header -->
+        <div class="mylist-drawer__header">
+          <div class="mylist-drawer__title-row">
+            <h2 class="mylist-drawer__title">My List</h2>
+            <span class="mylist-drawer__count-badge" id="mylist-drawer-count" aria-live="polite">0</span>
+          </div>
+          <button class="mylist-drawer__close-btn" id="mylist-close-btn" aria-label="Close My List">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Saved games list -->
+        <ul class="mylist-drawer__list" id="mylist-items" role="list" aria-label="Saved games" aria-live="polite">
+          <!-- Game rows injected by JS -->
+        </ul>
+
+        <!-- Empty state for My List -->
+        <div class="mylist-drawer__empty" id="mylist-empty" hidden>
+          <div class="mylist-drawer__empty-icon" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <p class="mylist-drawer__empty-title">Your list is empty</p>
+          <p class="mylist-drawer__empty-subtitle">Save games by clicking the bookmark icon on any game.</p>
+        </div>
+
+      </div>
+    </aside>
+
+
+    <!-- ═══════════════════════════════════════════
+         TOAST NOTIFICATION CONTAINER
+    ═══════════════════════════════════════════ -->
+    <div
+      class="toast-container"
+      id="toast-container"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-label="Notifications"
+    >
+      <!-- Toast elements injected and removed by JS -->
+    </div>
+
+
+    <script src="script.js"></script>
+  </body>
+</html>
