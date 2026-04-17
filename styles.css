@@ -560,8 +560,8 @@ select, input { font-family: inherit; font-size: inherit; }
   display: none;
 }
 .hero__cover-img {
-  width: 300px;
-  height: 400px;
+  width: 360px;
+  height: 480px;
   object-fit: cover;
   border-radius: var(--radius-xl);
   box-shadow: 0 28px 80px rgba(0,0,0,0.75);
@@ -1899,8 +1899,8 @@ select, input { font-family: inherit; font-size: inherit; }
   .hero__content        { max-width: 460px; }
 
   .hero__cover-img {
-    width: 260px;
-    height: 350px;
+    width: 300px;
+    height: 400px;
   }
 }
 
@@ -1923,8 +1923,8 @@ select, input { font-family: inherit; font-size: inherit; }
   :root { --page-px: 40px; }
 
   .hero__cover-img {
-    width: 360px;
-    height: 480px;
+    width: 460px;
+    height: 615px;
   }
 
   .game-grid {
