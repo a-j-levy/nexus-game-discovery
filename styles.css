@@ -431,7 +431,7 @@ select, input { font-family: inherit; font-size: inherit; }
 }
 
 .hero__title {
-  font-family: var(--font-display);
+  font-family: 'Inter Tight', system-ui, sans-serif;
   font-size: clamp(2.2rem, 4.5vw, 3.8rem);
   font-weight: 800;
   line-height: 1.08;
