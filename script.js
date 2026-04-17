@@ -1053,25 +1053,25 @@ function updateResultsCount() {
 ───────────────────────────────────────── */
 
 function showEmptyState() {
-  dom.emptyState.hidden   = false;
-  dom.errorState.hidden   = true;
-  dom.loadMoreWrap.hidden = true;
+  dom.emptyState.style.display   = 'flex';
+  dom.errorState.style.display   = 'none';
+  dom.loadMoreWrap.style.display = 'none';
   dom.gameGrid.innerHTML  = '';
   dom.gameGrid.setAttribute('aria-busy', 'false');
 }
 
 function showErrorState(msg) {
-  dom.errorState.hidden   = false;
-  dom.emptyState.hidden   = true;
-  dom.loadMoreWrap.hidden = true;
+  dom.errorState.style.display   = 'flex';
+  dom.emptyState.style.display   = 'none';
+  dom.loadMoreWrap.style.display = 'none';
   dom.gameGrid.innerHTML  = '';
   dom.gameGrid.setAttribute('aria-busy', 'false');
   if (msg) dom.errorMessage.textContent = msg;
 }
 
 function hideStates() {
-  dom.emptyState.hidden = true;
-  dom.errorState.hidden = true;
+  dom.emptyState.style.display = 'none';
+  dom.errorState.style.display = 'none';
 }
 
 function setLoadMoreBusy(busy) {
@@ -1109,7 +1109,7 @@ async function loadGames() {
 
     appendCards(state.games);
     updateResultsCount();
-    dom.loadMoreWrap.hidden = !state.nextPageUrl;
+    dom.loadMoreWrap.style.display = state.nextPageUrl ? 'flex' : 'none';
 
   } catch (err) {
     console.error('loadGames failed:', err);
@@ -1129,7 +1129,7 @@ async function loadMore() {
     state.games.push(...newGames);
     state.nextPageUrl = data.next ?? null;
     appendCards(newGames);
-    dom.loadMoreWrap.hidden = !state.nextPageUrl;
+    dom.loadMoreWrap.style.display = state.nextPageUrl ? 'flex' : 'none';
   } catch (err) {
     console.error('loadMore failed:', err);
     showToast('Failed to load more games. Please try again.', 'error'); // Phase 7
