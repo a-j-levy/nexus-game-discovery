@@ -46,9 +46,66 @@ const ORDERING_LABELS = {
   'released': 'Oldest', '-added': 'Most Added', 'name': 'A → Z',
 };
 const PLATFORM_ABBREV = {
-  'PC': 'PC', 'PlayStation 5': 'PS5', 'PlayStation 4': 'PS4', 'PlayStation 3': 'PS3',
-  'Xbox One': 'XBO', 'Xbox Series S/X': 'XSX', 'Nintendo Switch': 'NSW',
-  'iOS': 'iOS', 'Android': 'AND', 'macOS': 'Mac', 'Linux': 'Lin',
+  // PC / general
+  'PC':                                    'PC',
+  'macOS':                                 'MAC',
+  'Linux':                                 'LINUX',
+  'Web':                                   'WEB',
+  // Mobile
+  'iOS':                                   'IOS',
+  'Android':                               'ANDROID',
+  // Xbox
+  'Xbox':                                  'XBOX',
+  'Xbox 360':                              'X360',
+  'Xbox One':                              'XB1',
+  'Xbox Series X':                         'XSX',
+  'Xbox Series S':                         'XSS',
+  'Xbox Series S/X':                       'XSX',   // RAWG combined entry
+  // PlayStation
+  'PlayStation':                           'PS1',
+  'PlayStation 2':                         'PS2',
+  'PlayStation 3':                         'PS3',
+  'PlayStation 4':                         'PS4',
+  'PlayStation 5':                         'PS5',
+  'PlayStation Portable':                  'PSP',
+  'PlayStation Vita':                      'PSV',
+  // Nintendo home
+  'Nintendo Switch':                       'NSW',
+  'Nintendo Wii U':                        'WIIU',
+  'Nintendo Wii':                          'WII',
+  'Nintendo GameCube':                     'GC',
+  'Nintendo 64':                           'N64',
+  // Nintendo handheld
+  'Nintendo DS':                           'NDS',
+  'Nintendo 3DS':                          '3DS',
+  'Game Boy':                              'GB',
+  'Game Boy Color':                        'GBC',
+  'Game Boy Advance':                      'GBA',
+  // Nintendo retro
+  'Nintendo Entertainment System':         'NES',
+  'Super Nintendo Entertainment System':   'SNES',
+  // Sega
+  'Dreamcast':                             'DC',
+  'Sega Genesis':                          'GEN',
+  'Sega Mega Drive':                       'GEN',
+  'Sega Genesis / Mega Drive':             'GEN',
+  'Sega Saturn':                           'SAT',
+  'Sega CD':                               'SEGACD',
+  // Atari
+  'Atari 2600':                            'A2600',
+  'Atari 5200':                            'A5200',
+  'Atari 7800':                            'A7800',
+  'Atari Jaguar':                          'JAG',
+  'Atari Lynx':                            'LYNX',
+  // Classic home computers
+  'Commodore 64':                          'C64',
+  'Amiga':                                 'AMIGA',
+  // Neo Geo
+  'Neo Geo':                               'NEOGEO',
+  'Neo Geo Pocket':                        'NGP',
+  'Neo Geo Pocket Color':                  'NGPC',
+  // Other
+  '3DO':                                   '3DO',
 };
 const RATING_COLORS = {
   great: 'var(--color-rating-great)', good:  'var(--color-rating-good)',
