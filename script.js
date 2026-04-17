@@ -12,7 +12,7 @@
    CONFIG
    Get a free API key at: https://rawg.io/apidocs
 ───────────────────────────────────────── */
-const API_KEY                 = 'YOUR_RAWG_API_KEY_HERE';
+const API_KEY                 = 'f139246c1a4f4077ad8a7118b2ea89d8';
 const BASE_URL                = 'https://api.rawg.io/api';
 const PAGE_SIZE               = 20;
 const HERO_SLIDE_COUNT        = 5;
