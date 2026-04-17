@@ -302,6 +302,16 @@ function esc(str) {
   return el.innerHTML;
 }
 
+/** Fisher-Yates shuffle — returns a new array, does not mutate the original. */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 /* Phase 7: truncate long strings for toast messages */
 function truncate(str, max = 40) {
   if (!str) return '';
@@ -707,7 +717,7 @@ function stopHeroTimer() {
 }
 
 function initHero(games) {
-  state.hero.games = games.slice(0, HERO_SLIDE_COUNT);
+  state.hero.games = shuffle(games).slice(0, HERO_SLIDE_COUNT);
   state.hero.index = 0;
 
   dom.heroDots.innerHTML = state.hero.games.map((_, i) => `
