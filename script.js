@@ -74,6 +74,7 @@ const PLATFORM_ABBREV = {
   'Nintendo Wii U':                        'WIIU',
   'Nintendo Wii':                          'WII',
   'Nintendo GameCube':                     'GC',
+  'GameCube':                              'GC',
   'Nintendo 64':                           'N64',
   // Nintendo handheld
   'Nintendo DS':                           'NDS',
