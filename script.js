@@ -318,6 +318,67 @@ function truncate(str, max = 40) {
   return str.length > max ? str.slice(0, max).trimEnd() + '…' : str;
 }
 
+/* ─────────────────────────────────────────
+   SEARCH RELEVANCE RE-RANKING
+───────────────────────────────────────── */
+
+/** Lowercase, collapse punctuation to spaces, trim. */
+function normalizeForSearch(str) {
+  return str
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Returns a score 0–4 for how well a title matches the query.
+ * Lower score = stronger match.
+ *   0 — exact title match
+ *   1 — title starts with the full query
+ *   2 — title contains the full query as a phrase
+ *   3 — title contains every individual query word
+ *   4 — weak / no meaningful match
+ */
+function scoreTitle(title, rawQuery) {
+  const q = normalizeForSearch(rawQuery);
+  const t = normalizeForSearch(title);
+
+  if (t === q)            return 0;
+  if (t.startsWith(q))   return 1;
+  if (t.includes(q))     return 2;
+
+  const words = q.split(' ').filter(Boolean);
+  if (words.length > 1 && words.every(w => t.includes(w))) return 3;
+
+  return 4;
+}
+
+/**
+ * Re-ranks games by title relevance when a search query is active.
+ * Filters out score-4 results for queries of 3+ characters, with a
+ * safety fallback: if filtering would empty the page, all are kept.
+ */
+function rerankBySearchRelevance(games, query) {
+  if (!query || query.trim().length < 2) return games;
+
+  const scored = games.map(game => ({
+    game,
+    score: scoreTitle(game.name ?? '', query),
+  }));
+
+  const filtered = query.trim().length >= 3
+    ? scored.filter(({ score }) => score < 4)
+    : scored;
+
+  // Safety: never return an empty page purely due to client-side filtering
+  const pool = filtered.length > 0 ? filtered : scored;
+
+  return pool
+    .sort((a, b) => a.score - b.score)
+    .map(({ game }) => game);
+}
+
 
 /* ─────────────────────────────────────────
    TOAST NOTIFICATIONS  (Phase 7)
@@ -1165,10 +1226,11 @@ async function loadGames() {
   updateResultsHeading();
 
   try {
-    const data = await apiFetch(buildGamesUrl());
-    state.games       = data.results ?? [];
-    state.nextPageUrl = data.next    ?? null;
-    state.totalCount  = data.count   ?? 0;
+    const data  = await apiFetch(buildGamesUrl());
+    const raw   = data.results ?? [];
+    state.games       = state.filters.search ? rerankBySearchRelevance(raw, state.filters.search) : raw;
+    state.nextPageUrl = data.next  ?? null;
+    state.totalCount  = data.count ?? 0;
 
     dom.gameGrid.innerHTML = '';
     if (!state.games.length) { showEmptyState(); return; }
@@ -1193,7 +1255,8 @@ async function loadMore() {
   setLoadMoreBusy(true);
   try {
     const data     = await apiFetch(state.nextPageUrl);
-    const newGames = data.results ?? [];
+    const raw      = data.results ?? [];
+    const newGames = state.filters.search ? rerankBySearchRelevance(raw, state.filters.search) : raw;
     state.games.push(...newGames);
     state.nextPageUrl = data.next ?? null;
     appendCards(newGames);
