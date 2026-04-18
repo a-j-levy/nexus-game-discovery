@@ -331,48 +331,79 @@ function normalizeForSearch(str) {
     .trim();
 }
 
-/**
- * Returns a score 0–4 for how well a title matches the query.
- * Lower score = stronger match.
- *   0 — exact title match
- *   1 — title starts with the full query
- *   2 — title contains the full query as a phrase
- *   3 — title contains every individual query word
- *   4 — weak / no meaningful match
- */
-function scoreTitle(title, rawQuery) {
-  const q = normalizeForSearch(rawQuery);
-  const t = normalizeForSearch(title);
+// Titles containing these words are penalised as derivative/low-quality.
+const DERIVATIVE_KEYWORDS = new Set([
+  'pack', 'picture', 'pictures', 'demo', 'wallpaper', 'wallpapers',
+  'mod', 'simulator', 'clicker',
+]);
 
-  if (t === q)            return 0;
-  if (t.startsWith(q))   return 1;
-  if (t.includes(q))     return 2;
-
-  const words = q.split(' ').filter(Boolean);
-  if (words.length > 1 && words.every(w => t.includes(w))) return 3;
-
-  return 4;
+function isDerivativeTitle(normalizedTitle) {
+  return normalizedTitle.split(' ').some(w => DERIVATIVE_KEYWORDS.has(w));
 }
 
 /**
- * Re-ranks games by title relevance when a search query is active.
- * Filters out score-4 results for queries of 3+ characters, with a
- * safety fallback: if filtering would empty the page, all are kept.
+ * Returns a relevance score for a title against the query. Lower = better.
+ *
+ * Base scores:
+ *   0  — exact match
+ *   1  — title starts with the full query
+ *   2  — title contains the full query as a phrase
+ *   3  — title contains every query word (multi-word queries only)
+ *   99 — no meaningful match (always filtered)
+ *
+ * A derivative-keyword penalty of +5 is added to scores 1-3 so that
+ * "Fortnite Pack" (score 6) sorts after "Fortnite Creative" (score 1)
+ * and can be cut entirely for focused single-word searches.
+ */
+function scoreTitle(title, rawQuery) {
+  const q          = normalizeForSearch(rawQuery);
+  const t          = normalizeForSearch(title);
+  const derivative = isDerivativeTitle(t) ? 5 : 0;
+
+  if (t === q)          return 0;
+  if (t.startsWith(q))  return 1 + derivative;
+  if (t.includes(q))    return 2 + derivative;
+
+  const words = q.split(' ').filter(Boolean);
+  if (words.length > 1 && words.every(w => t.includes(w))) return 3 + derivative;
+
+  return 99;
+}
+
+/**
+ * Re-ranks results by title relevance and applies tiered filtering.
+ *
+ * Filtering thresholds:
+ *  - Score 99 is always removed (no meaningful match).
+ *  - For single-word specific queries (≥3 chars, no spaces), scores ≥6
+ *    are also removed — this cuts derivative titles like "Fortnite Pack"
+ *    while keeping clean matches like "Fortnite: Battle Royale".
+ *  - For multi-word queries, derivatives are kept but sorted to the bottom.
+ *
+ * Safety fallback: if filtering empties the page, all non-99 results are kept.
  */
 function rerankBySearchRelevance(games, query) {
   if (!query || query.trim().length < 2) return games;
+
+  const q            = normalizeForSearch(query);
+  const isSingleWord = !q.includes(' ');
+  const isSpecific   = q.length >= 3;
 
   const scored = games.map(game => ({
     game,
     score: scoreTitle(game.name ?? '', query),
   }));
 
-  const filtered = query.trim().length >= 3
-    ? scored.filter(({ score }) => score < 4)
-    : scored;
+  const filtered = scored.filter(({ score }) => {
+    if (score === 99) return false;
+    if (isSpecific && isSingleWord && score >= 6) return false;
+    return true;
+  });
 
   // Safety: never return an empty page purely due to client-side filtering
-  const pool = filtered.length > 0 ? filtered : scored;
+  const pool = filtered.length > 0
+    ? filtered
+    : scored.filter(({ score }) => score < 99);
 
   return pool
     .sort((a, b) => a.score - b.score)
