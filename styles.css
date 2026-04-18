@@ -375,6 +375,7 @@ select, input { font-family: inherit; font-size: inherit; }
   min-height: 88vh;
   display: flex;
   align-items: center;
+  gap: var(--sp-8);
   overflow: hidden;
   padding: var(--sp-20) var(--page-px) var(--sp-24);
 }
@@ -406,8 +407,8 @@ select, input { font-family: inherit; font-size: inherit; }
 .hero__content {
   position: relative;
   z-index: 1;
-  max-width: 560px;
-  flex: 1;
+  max-width: 480px;
+  flex: 0 0 auto;
 }
 
 .hero__eyebrow {
@@ -550,19 +551,23 @@ select, input { font-family: inherit; font-size: inherit; }
   color: var(--color-accent);
 }
 
-/* Floating cover art (tablet+) */
+/* Cover art column (tablet+) */
 .hero__cover-wrap {
-  position: absolute;
-  right: max(var(--page-px), calc(50% - 620px));
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  align-self: center;
   z-index: 1;
   display: none;
 }
 .hero__cover-img {
-  width: 360px;
-  height: 480px;
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 3 / 4;
+  max-height: 68vh;
   object-fit: cover;
+  object-position: top center;
   border-radius: var(--radius-xl);
   box-shadow: 0 28px 80px rgba(0,0,0,0.75);
   border: 1px solid var(--color-border-strong);
@@ -1896,12 +1901,7 @@ select, input { font-family: inherit; font-size: inherit; }
 @media (min-width: 600px) {
   .navbar__mylist-label { display: inline; }
   .hero__cover-wrap     { display: block; }
-  .hero__content        { max-width: 460px; }
-
-  .hero__cover-img {
-    width: 300px;
-    height: 400px;
-  }
+  .hero__content        { max-width: 260px; }
 }
 
 
@@ -1913,6 +1913,7 @@ select, input { font-family: inherit; font-size: inherit; }
   .navbar__menu-toggle      { display: none; }
   .sidebar                  { display: flex; }
   .game-section__filter-toggle { display: none; }
+  .hero__content            { max-width: 380px; }
 }
 
 
@@ -1922,10 +1923,7 @@ select, input { font-family: inherit; font-size: inherit; }
 @media (min-width: 1200px) {
   :root { --page-px: 40px; }
 
-  .hero__cover-img {
-    width: 460px;
-    height: 615px;
-  }
+  .hero__content { max-width: 460px; }
 
   .game-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
