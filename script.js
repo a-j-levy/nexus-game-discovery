@@ -25,6 +25,17 @@ const MAX_SCREENSHOTS         = 8;
 const MY_LIST_KEY             = 'nexus_mylist'; // localStorage key
 const TOAST_DURATION          = 3000;           // Phase 7: ms before toast auto-dismisses
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const cardObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('game-card--visible');
+      cardObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.05, rootMargin: '0px 0px -10px 0px' });
+
 
 /* ─────────────────────────────────────────
    LABEL MAPS
@@ -737,10 +748,20 @@ function buildGameCard(game) {
 
 function appendCards(games) {
   const frag = document.createDocumentFragment();
-  games.forEach(game => frag.appendChild(buildGameCard(game)));
+  const cards = games.map(game => buildGameCard(game));
+  cards.forEach(card => frag.appendChild(card));
   dom.gameGrid.appendChild(frag);
   dom.gameGrid.setAttribute('aria-busy', 'false');
   syncCardSavedStates();
+
+  if (prefersReducedMotion) {
+    cards.forEach(card => card.classList.add('game-card--visible'));
+  } else {
+    cards.forEach((card, i) => {
+      card.style.setProperty('--card-delay', `${Math.min(i * 50, 240)}ms`);
+      cardObserver.observe(card);
+    });
+  }
 }
 
 

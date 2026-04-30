@@ -1002,9 +1002,11 @@ select, input { font-family: inherit; font-size: inherit; }
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base), opacity 0.5s ease var(--card-delay, 0ms);
   box-shadow: var(--shadow-card);
+  opacity: 0;
 }
+.game-card--visible { opacity: 1; }
 .game-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(108,99,255,0.22);
