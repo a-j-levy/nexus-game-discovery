@@ -1008,6 +1008,69 @@ select, input { font-family: inherit; font-size: inherit; }
 
 
 /* ─────────────────────────────────────────
+   MOOD DISCOVERY
+───────────────────────────────────────── */
+.mood-section {
+  margin-bottom: var(--sp-6);
+}
+.mood-section__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--sp-3);
+}
+.mood-cards {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.mood-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  flex: 1;
+  min-width: 80px;
+  max-width: 160px;
+  transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+.mood-card:hover {
+  background: var(--color-elevated);
+  border-color: var(--color-border-strong);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+.mood-card--active {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+.mood-card--active:hover { background: rgba(108,99,255,0.18); }
+.mood-card__emoji { font-size: 1.6rem; line-height: 1; }
+.mood-card__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+.mood-card__desc {
+  font-size: 0.67rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.4;
+  display: none;
+}
+@media (min-width: 700px) { .mood-card__desc { display: block; } }
+
+
+/* ─────────────────────────────────────────
    11. GAME GRID
 ───────────────────────────────────────── */
 .game-grid {

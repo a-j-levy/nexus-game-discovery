@@ -147,6 +147,48 @@ const TOAST_ICONS = {
 
 
 /* ─────────────────────────────────────────
+   MOODS
+───────────────────────────────────────── */
+const MOODS = [
+  {
+    id:          'chill',
+    emoji:       '🌙',
+    label:       'Chill',
+    description: 'Relaxing games to unwind with',
+    filters: { genres: ['simulation', 'casual', 'puzzle'], minRating: 70, ordering: '-rating' },
+  },
+  {
+    id:          'intense',
+    emoji:       '⚡',
+    label:       'Intense',
+    description: 'High-energy, adrenaline-pumping action',
+    filters: { genres: ['action', 'shooter', 'fighting'], minRating: 75, ordering: '-metacritic' },
+  },
+  {
+    id:          'nostalgic',
+    emoji:       '🕹️',
+    label:       'Nostalgic',
+    description: 'Classics from the golden era of gaming',
+    filters: { genres: [], minRating: 80, yearFrom: '1990', yearTo: '2005', ordering: '-metacritic' },
+  },
+  {
+    id:          'social',
+    emoji:       '👾',
+    label:       'Social',
+    description: 'Games best played with others',
+    filters: { genres: [], minRating: 70, multiplayer: true, ordering: '-rating' },
+  },
+  {
+    id:          'story',
+    emoji:       '📖',
+    label:       'Story-Driven',
+    description: 'Deep narratives and rich worlds',
+    filters: { genres: ['role-playing-games-rpg', 'adventure'], minRating: 80, ordering: '-metacritic' },
+  },
+];
+
+
+/* ─────────────────────────────────────────
    STATE
 ───────────────────────────────────────── */
 const state = {
@@ -155,8 +197,9 @@ const state = {
   totalCount:   0,
   isLoading:    false,
   hero:         { games: [], index: 0, timer: null },
+  activeMood:   null,
   filters: {
-    search: '', genre: '', platform: '', minRating: 0,
+    search: '', genre: '', genres: [], platform: '', minRating: 0,
     yearFrom: '', yearTo: '', ordering: DEFAULT_ORDERING, multiplayer: false,
   },
 };
@@ -267,6 +310,9 @@ const dom = {
 
   // Surprise Me
   surpriseBtn: $('surprise-btn'),
+
+  // Mood
+  moodCards: $('mood-cards'),
 };
 
 
@@ -461,7 +507,8 @@ function buildGamesUrl() {
 
   const f = state.filters;
   if (f.search)        url.searchParams.set('search', f.search);
-  if (f.genre)         url.searchParams.set('genres', f.genre);
+  if (f.genres && f.genres.length) url.searchParams.set('genres', f.genres.join(','));
+  else if (f.genre)                url.searchParams.set('genres', f.genre);
   if (f.platform)      url.searchParams.set('platforms', f.platform);
   if (f.minRating > 0) url.searchParams.set('metacritic', `${f.minRating},100`);
   if (f.multiplayer)   url.searchParams.set('tags', MULTIPLAYER_TAG);
@@ -1196,7 +1243,7 @@ function updateActiveFilterPills() {
 }
 
 const FILTER_DEFAULTS = {
-  search: '', genre: '', platform: '', minRating: 0,
+  search: '', genre: '', genres: [], platform: '', minRating: 0,
   yearFrom: '', yearTo: '', ordering: DEFAULT_ORDERING, multiplayer: false,
 };
 
@@ -1209,8 +1256,10 @@ function removeSingleFilter(key) {
 
 function clearAllFilters() {
   Object.assign(state.filters, { ...FILTER_DEFAULTS });
+  state.activeMood = null;
   syncFiltersToDom();
   updateActiveFilterPills();
+  renderMoodCards();
   triggerLoad();
 }
 
@@ -1221,9 +1270,16 @@ function clearAllFilters() {
 
 function updateResultsHeading() {
   const f = state.filters;
-  if (f.search)                dom.resultsHeading.textContent = `Results for "${f.search}"`;
-  else if (hasActiveFilters()) dom.resultsHeading.textContent = 'Filtered Games';
-  else                         dom.resultsHeading.textContent = 'Discover Games';
+  if (f.search) {
+    dom.resultsHeading.textContent = `Results for "${f.search}"`;
+  } else if (state.activeMood) {
+    const mood = MOODS.find(m => m.id === state.activeMood);
+    dom.resultsHeading.textContent = mood ? `${mood.emoji}  ${mood.label} Games` : 'Filtered Games';
+  } else if (hasActiveFilters()) {
+    dom.resultsHeading.textContent = 'Filtered Games';
+  } else {
+    dom.resultsHeading.textContent = 'Discover Games';
+  }
 }
 
 function updateResultsCount() {
@@ -1419,6 +1475,53 @@ function closeActiveOverlay() {
 
 
 /* ─────────────────────────────────────────
+   MOOD DISCOVERY
+───────────────────────────────────────── */
+
+function renderMoodCards() {
+  if (!dom.moodCards) return;
+  dom.moodCards.innerHTML = '';
+  MOODS.forEach(mood => {
+    const card = document.createElement('button');
+    card.className = 'mood-card' + (state.activeMood === mood.id ? ' mood-card--active' : '');
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-pressed', String(state.activeMood === mood.id));
+    card.setAttribute('aria-label', `${mood.label}: ${mood.description}`);
+    card.innerHTML = `
+      <span class="mood-card__emoji" aria-hidden="true">${mood.emoji}</span>
+      <span class="mood-card__name">${esc(mood.label)}</span>
+      <span class="mood-card__desc">${esc(mood.description)}</span>
+    `;
+    card.addEventListener('click', () => applyMood(mood));
+    dom.moodCards.appendChild(card);
+  });
+}
+
+function applyMood(mood) {
+  if (state.activeMood === mood.id) {
+    clearAllFilters();
+    return;
+  }
+
+  state.activeMood = mood.id;
+  Object.assign(state.filters, { ...FILTER_DEFAULTS });
+
+  const mf = mood.filters;
+  state.filters.genres      = mf.genres      ?? [];
+  state.filters.minRating   = mf.minRating   ?? 0;
+  state.filters.yearFrom    = mf.yearFrom    ?? '';
+  state.filters.yearTo      = mf.yearTo      ?? '';
+  state.filters.multiplayer = mf.multiplayer ?? false;
+  state.filters.ordering    = mf.ordering    ?? DEFAULT_ORDERING;
+
+  syncFiltersToDom();
+  updateActiveFilterPills();
+  renderMoodCards();
+  triggerLoad();
+}
+
+
+/* ─────────────────────────────────────────
    SURPRISE ME
 ───────────────────────────────────────── */
 
@@ -1559,5 +1662,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMyList();  // load persisted list before anything renders
   initFilters();
   initEvents();
+  renderMoodCards();
   loadGames();
 });
