@@ -313,6 +313,14 @@ const dom = {
 
   // Mood
   moodCards: $('mood-cards'),
+
+  // Comparison
+  compareBar:        $('compare-bar'),
+  compareGoBtn:      $('compare-go-btn'),
+  compareClearBtn:   $('compare-clear-btn'),
+  compareBackdrop:   $('compare-backdrop'),
+  compareModalBody:  $('compare-modal-body'),
+  compareModalClose: $('compare-modal-close'),
 };
 
 
@@ -773,6 +781,7 @@ function buildGameCard(game) {
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
         </svg>
       </div>
+      <button class="compare-btn" aria-label="Add ${title} to comparison" title="Compare">+</button>
     </div>
     <div class="game-card__body">
       <h3 class="game-card__title">${title}</h3>
@@ -787,6 +796,12 @@ function buildGameCard(game) {
       </div>
     </div>
   `;
+
+  const cmpBtn = card.querySelector('.compare-btn');
+  cmpBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleCompare(game, card);
+  });
 
   card.addEventListener('click', () => openDetailPanel(game));
   card.addEventListener('keydown', e => {
@@ -803,6 +818,7 @@ function appendCards(games) {
   dom.gameGrid.appendChild(frag);
   dom.gameGrid.setAttribute('aria-busy', 'false');
   syncCardSavedStates();
+  syncCardCompareStates();
 
   if (prefersReducedMotion) {
     cards.forEach(card => card.classList.add('game-card--visible'));
@@ -1555,6 +1571,199 @@ async function surpriseMe() {
 
 
 /* ─────────────────────────────────────────
+   GAME COMPARISON
+───────────────────────────────────────── */
+
+let compareList = []; // max 2 game objects
+
+function toggleCompare(game, card) {
+  const idx = compareList.findIndex(g => g.id === game.id);
+  if (idx !== -1) {
+    compareList.splice(idx, 1);
+  } else {
+    if (compareList.length >= 2) {
+      showToast('You can only compare 2 games at a time. Remove one first.', 'info');
+      return;
+    }
+    compareList.push(game);
+  }
+  syncCardCompareStates();
+  renderCompareBar();
+}
+
+function syncCardCompareStates() {
+  document.querySelectorAll('.game-card').forEach(card => {
+    const id  = Number(card.dataset.gameId);
+    const btn = card.querySelector('.compare-btn');
+    if (!btn) return;
+    const selected = compareList.some(g => g.id === id);
+    btn.classList.toggle('compare-btn--selected', selected);
+    btn.textContent   = selected ? '✓' : '+';
+    btn.style.fontSize = selected ? '11px' : '15px';
+  });
+}
+
+function renderCompareBar() {
+  const bar = dom.compareBar;
+  const visible = compareList.length > 0;
+  bar.classList.toggle('compare-bar--visible', visible);
+  bar.setAttribute('aria-hidden', String(!visible));
+  dom.compareGoBtn.disabled = compareList.length < 2;
+
+  [0, 1].forEach(i => {
+    const slot = document.getElementById(`compare-slot-${i}`);
+    if (!slot) return;
+    const game = compareList[i];
+    if (game) {
+      const img = game.background_image
+        ? `<img class="compare-bar__slot-thumb" src="${game.background_image}" alt="">`
+        : '';
+      slot.innerHTML = `
+        ${img}
+        <span class="compare-bar__slot-name">${esc(game.name)}</span>
+        <button class="compare-bar__slot-remove" aria-label="Remove ${esc(game.name)} from comparison" data-id="${game.id}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      `;
+      slot.querySelector('.compare-bar__slot-remove').addEventListener('click', e => {
+        e.stopPropagation();
+        compareList = compareList.filter(g => g.id !== Number(e.currentTarget.dataset.id));
+        syncCardCompareStates();
+        renderCompareBar();
+      });
+    } else {
+      slot.innerHTML = `<span class="compare-bar__slot-placeholder">Select a game</span>`;
+    }
+  });
+}
+
+async function openCompareModal() {
+  if (compareList.length < 2) return;
+  dom.compareBackdrop.classList.add('compare-backdrop--open');
+  dom.compareBackdrop.setAttribute('aria-hidden', 'false');
+  dom.compareModalBody.innerHTML = `<p class="compare-modal__loading">Loading details…</p>`;
+
+  try {
+    const [d1, d2] = await Promise.all(compareList.map(g => fetchDetailForCompare(g.id)));
+    dom.compareModalBody.innerHTML = renderCompareModalContent(compareList[0], compareList[1], d1, d2);
+  } catch {
+    dom.compareModalBody.innerHTML = `<p class="compare-modal__loading">Failed to load details. Please try again.</p>`;
+  }
+}
+
+function closeCompareModal() {
+  dom.compareBackdrop.classList.remove('compare-backdrop--open');
+  dom.compareBackdrop.setAttribute('aria-hidden', 'true');
+}
+
+async function fetchDetailForCompare(gameId) {
+  if (detailCache.has(gameId)) return detailCache.get(gameId).detail;
+  const detail = await apiFetch(`${BASE_URL}/games/${gameId}?key=${API_KEY}`);
+  if (!detailCache.has(gameId)) detailCache.set(gameId, { detail, screenshots: [] });
+  return detail;
+}
+
+function renderCompareModalContent(g1, g2, d1, d2) {
+  const coverCell = (g, d) => g.background_image
+    ? `<img class="compare-modal__cover" src="${g.background_image}" alt="${esc(g.name)}">`
+    : `<div class="compare-modal__cover-placeholder">🎮</div>`;
+
+  const coversHtml = `
+    <div class="compare-modal__covers">
+      <div class="compare-modal__game-header">
+        ${coverCell(g1, d1)}
+        <p class="compare-modal__game-name">${esc(g1.name)}</p>
+      </div>
+      <div class="compare-modal__vs-col">
+        <span class="compare-modal__vs-badge">VS</span>
+      </div>
+      <div class="compare-modal__game-header">
+        ${coverCell(g2, d2)}
+        <p class="compare-modal__game-name">${esc(g2.name)}</p>
+      </div>
+    </div>
+  `;
+
+  const val1 = (fn) => { try { return fn(d1, g1); } catch { return '—'; } };
+  const val2 = (fn) => { try { return fn(d2, g2); } catch { return '—'; } };
+
+  const score1 = d1.metacritic ?? null;
+  const score2 = d2.metacritic ?? null;
+
+  const rows = [
+    {
+      label: 'Metacritic',
+      v1: score1 ?? '—',
+      v2: score2 ?? '—',
+      winner: score1 && score2 ? (score1 > score2 ? 1 : score2 > score1 ? 2 : 0) : 0,
+    },
+    {
+      label: 'Release Year',
+      v1: val1((d,g) => g.released ? g.released.slice(0,4) : '—'),
+      v2: val2((d,g) => g.released ? g.released.slice(0,4) : '—'),
+      winner: 0,
+    },
+    {
+      label: 'Avg. Playtime',
+      v1: val1(d => d.playtime ? `${d.playtime}h` : '—'),
+      v2: val2(d => d.playtime ? `${d.playtime}h` : '—'),
+      winner: (() => {
+        const p1 = d1.playtime ?? null, p2 = d2.playtime ?? null;
+        return p1 && p2 ? (p1 > p2 ? 1 : p2 > p1 ? 2 : 0) : 0;
+      })(),
+    },
+    {
+      label: 'Genres',
+      v1: val1(d => (d.genres ?? []).map(g => g.name).slice(0,3).join(', ') || '—'),
+      v2: val2(d => (d.genres ?? []).map(g => g.name).slice(0,3).join(', ') || '—'),
+      winner: 0,
+    },
+    {
+      label: 'Platforms',
+      v1: val1(d => (d.platforms ?? []).map(p => p.platform.name).slice(0,4).join(', ') || '—'),
+      v2: val2(d => (d.platforms ?? []).map(p => p.platform.name).slice(0,4).join(', ') || '—'),
+      winner: 0,
+    },
+    {
+      label: 'Developer',
+      v1: val1(d => (d.developers ?? []).map(x => x.name).join(', ') || '—'),
+      v2: val2(d => (d.developers ?? []).map(x => x.name).join(', ') || '—'),
+      winner: 0,
+    },
+    {
+      label: 'Publisher',
+      v1: val1(d => (d.publishers ?? []).map(x => x.name).join(', ') || '—'),
+      v2: val2(d => (d.publishers ?? []).map(x => x.name).join(', ') || '—'),
+      winner: 0,
+    },
+    {
+      label: 'ESRB Rating',
+      v1: val1(d => d.esrb_rating?.name ?? '—'),
+      v2: val2(d => d.esrb_rating?.name ?? '—'),
+      winner: 0,
+    },
+  ];
+
+  const tableRows = rows.map(({ label, v1, v2, winner }) => `
+    <tr>
+      <td class="${winner === 1 ? 'compare-modal__win' : ''}">${esc(String(v1))}</td>
+      <td>${esc(label)}</td>
+      <td class="${winner === 2 ? 'compare-modal__win' : ''}">${esc(String(v2))}</td>
+    </tr>
+  `).join('');
+
+  return `
+    ${coversHtml}
+    <table class="compare-modal__table">
+      <tbody>${tableRows}</tbody>
+    </table>
+  `;
+}
+
+
+/* ─────────────────────────────────────────
    MY LIST — init
 ───────────────────────────────────────── */
 
@@ -1572,6 +1781,18 @@ function initMyList() {
 function initEvents() {
   // Surprise Me
   dom.surpriseBtn.addEventListener('click', surpriseMe);
+
+  // Game comparison
+  dom.compareGoBtn.addEventListener('click', openCompareModal);
+  dom.compareClearBtn.addEventListener('click', () => {
+    compareList = [];
+    syncCardCompareStates();
+    renderCompareBar();
+  });
+  dom.compareModalClose.addEventListener('click', closeCompareModal);
+  dom.compareBackdrop.addEventListener('click', e => {
+    if (e.target === dom.compareBackdrop) closeCompareModal();
+  });
 
   // Grid
   dom.loadMoreBtn.addEventListener('click', loadMore);
@@ -1643,6 +1864,10 @@ function initEvents() {
   // Keyboard
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      if (dom.compareBackdrop.classList.contains('compare-backdrop--open')) {
+        closeCompareModal();
+        return;
+      }
       closeActiveOverlay();
       return;
     }

@@ -598,6 +598,46 @@
 
 
     <!-- ═══════════════════════════════════════════
+         COMPARE BAR
+    ═══════════════════════════════════════════ -->
+    <div class="compare-bar" id="compare-bar" role="region" aria-label="Game comparison" aria-hidden="true">
+      <div class="compare-bar__slots">
+        <div class="compare-bar__slot" id="compare-slot-0">
+          <span class="compare-bar__slot-placeholder">Select a game</span>
+        </div>
+        <span class="compare-bar__vs" aria-hidden="true">VS</span>
+        <div class="compare-bar__slot" id="compare-slot-1">
+          <span class="compare-bar__slot-placeholder">Select a game</span>
+        </div>
+      </div>
+      <div class="compare-bar__actions">
+        <button class="compare-bar__clear-btn" id="compare-clear-btn" aria-label="Clear comparison selection">Clear</button>
+        <button class="compare-bar__go-btn" id="compare-go-btn" disabled aria-label="Open side-by-side comparison">Compare</button>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         COMPARE MODAL
+    ═══════════════════════════════════════════ -->
+    <div class="compare-backdrop" id="compare-backdrop" aria-hidden="true">
+      <div class="compare-modal" id="compare-modal" role="dialog" aria-modal="true" aria-labelledby="compare-modal-title">
+        <div class="compare-modal__header">
+          <h2 class="compare-modal__title" id="compare-modal-title">Side-by-Side Comparison</h2>
+          <button class="compare-modal__close-btn" id="compare-modal-close" aria-label="Close comparison">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="compare-modal__body" id="compare-modal-body">
+          <!-- Content injected by JS -->
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
          TOAST NOTIFICATION CONTAINER
     ═══════════════════════════════════════════ -->
     <div
