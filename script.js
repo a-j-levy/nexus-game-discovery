@@ -1,29 +1,19 @@
-/* ══════════════════════════════════════════════════════════════════
-   NEXUS — script.js
-   Phase 3: API fetch, hero carousel, game card rendering, pagination
-   Phase 4: Live search, filters, active pills, mobile sidebar
-   Phase 5: Slide-in detail panel, screenshots, full metadata
-   Phase 6: My List — localStorage persistence, drawer, sync
-   Phase 7: Toast notifications, keyboard polish, edge case fixes
-   ══════════════════════════════════════════════════════════════════ */
+// Nexus - Game Discovery
+// Uses the RAWG API to browse, filter, and save games
 
-
-/* ─────────────────────────────────────────
-   CONFIG
-   Get a free API key at: https://rawg.io/apidocs
-───────────────────────────────────────── */
-const API_KEY                 = 'f139246c1a4f4077ad8a7118b2ea89d8';
-const BASE_URL                = 'https://api.rawg.io/api';
-const PAGE_SIZE               = 20;
-const HERO_SLIDE_COUNT        = 5;
-const HERO_INTERVAL_MS        = 7000;
-const EARLIEST_YEAR           = 1980;
-const DEFAULT_ORDERING        = '-metacritic';
-const MULTIPLAYER_TAG         = 7;
+// config - get a free API key at rawg.io/apidocs
+const API_KEY = 'f139246c1a4f4077ad8a7118b2ea89d8';
+const BASE_URL = 'https://api.rawg.io/api';
+const PAGE_SIZE = 20;
+const HERO_SLIDE_COUNT = 5;
+const HERO_INTERVAL_MS = 7000;
+const EARLIEST_YEAR = 1980;
+const DEFAULT_ORDERING = '-metacritic';
+const MULTIPLAYER_TAG = 7;
 const DESCRIPTION_CLAMP_LIMIT = 500;
-const MAX_SCREENSHOTS         = 8;
-const MY_LIST_KEY             = 'nexus_mylist'; // localStorage key
-const TOAST_DURATION          = 3000;           // Phase 7: ms before toast auto-dismisses
+const MAX_SCREENSHOTS = 8;
+const MY_LIST_KEY = 'nexus_mylist';
+const TOAST_DURATION = 3000;
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -36,10 +26,7 @@ const cardObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.05, rootMargin: '0px 0px -10px 0px' });
 
-
-/* ─────────────────────────────────────────
-   LABEL MAPS
-───────────────────────────────────────── */
+// label maps
 const GENRE_LABELS = {
   'action': 'Action', 'indie': 'Indie', 'adventure': 'Adventure',
   'role-playing-games-rpg': 'RPG', 'strategy': 'Strategy', 'shooter': 'Shooter',
@@ -57,67 +44,31 @@ const ORDERING_LABELS = {
   'released': 'Oldest', '-added': 'Most Added', 'name': 'A → Z',
 };
 const PLATFORM_ABBREV = {
-  // PC / general
-  'PC':                                    'PC',
-  'macOS':                                 'MAC',
-  'Linux':                                 'LINUX',
-  'Web':                                   'WEB',
-  // Mobile
-  'iOS':                                   'IOS',
-  'Android':                               'ANDROID',
-  // Xbox
-  'Xbox':                                  'XBOX',
-  'Xbox 360':                              'X360',
-  'Xbox One':                              'XB1',
-  'Xbox Series X':                         'XSX',
-  'Xbox Series S':                         'XSS',
-  'Xbox Series S/X':                       'XSX',   // RAWG combined entry
-  // PlayStation
-  'PlayStation':                           'PS1',
-  'PlayStation 2':                         'PS2',
-  'PlayStation 3':                         'PS3',
-  'PlayStation 4':                         'PS4',
-  'PlayStation 5':                         'PS5',
-  'PlayStation Portable':                  'PSP',
-  'PlayStation Vita':                      'PSV',
-  // Nintendo home
-  'Nintendo Switch':                       'NSW',
-  'Nintendo Wii U':                        'WIIU',
-  'Nintendo Wii':                          'WII',
-  'Nintendo GameCube':                     'GC',
-  'GameCube':                              'GC',
-  'Nintendo 64':                           'N64',
-  // Nintendo handheld
-  'Nintendo DS':                           'NDS',
-  'Nintendo 3DS':                          '3DS',
-  'Game Boy':                              'GB',
-  'Game Boy Color':                        'GBC',
-  'Game Boy Advance':                      'GBA',
-  // Nintendo retro
-  'Nintendo Entertainment System':         'NES',
-  'Super Nintendo Entertainment System':   'SNES',
-  // Sega
-  'Dreamcast':                             'DC',
-  'Sega Genesis':                          'GEN',
-  'Sega Mega Drive':                       'GEN',
-  'Sega Genesis / Mega Drive':             'GEN',
-  'Sega Saturn':                           'SAT',
-  'Sega CD':                               'SEGACD',
-  // Atari
-  'Atari 2600':                            'A2600',
-  'Atari 5200':                            'A5200',
-  'Atari 7800':                            'A7800',
-  'Atari Jaguar':                          'JAG',
-  'Atari Lynx':                            'LYNX',
-  // Classic home computers
-  'Commodore 64':                          'C64',
-  'Amiga':                                 'AMIGA',
-  // Neo Geo
-  'Neo Geo':                               'NEOGEO',
-  'Neo Geo Pocket':                        'NGP',
-  'Neo Geo Pocket Color':                  'NGPC',
-  // Other
-  '3DO':                                   '3DO',
+  'PC': 'PC',
+  'macOS': 'MAC',
+  'Linux': 'LINUX',
+  'iOS': 'IOS',
+  'Android': 'ANDROID',
+  'Xbox': 'XBOX',
+  'Xbox 360': 'X360',
+  'Xbox One': 'XB1',
+  'Xbox Series X': 'XSX',
+  'Xbox Series S/X': 'XSX',
+  'PlayStation': 'PS1',
+  'PlayStation 2': 'PS2',
+  'PlayStation 3': 'PS3',
+  'PlayStation 4': 'PS4',
+  'PlayStation 5': 'PS5',
+  'PlayStation Portable': 'PSP',
+  'Nintendo Switch': 'NSW',
+  'Nintendo Wii': 'WII',
+  'Nintendo 64': 'N64',
+  'Nintendo 3DS': '3DS',
+  'Game Boy Advance': 'GBA',
+  'Nintendo Entertainment System': 'NES',
+  'Super Nintendo Entertainment System': 'SNES',
+  'Dreamcast': 'DC',
+  'Sega Genesis': 'GEN',
 };
 const RATING_COLORS = {
   great: 'var(--color-rating-great)', good:  'var(--color-rating-good)',
@@ -125,7 +76,6 @@ const RATING_COLORS = {
   none:  'var(--color-text-muted)',
 };
 
-/* Phase 7: SVG icons for each toast type */
 const TOAST_ICONS = {
   success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -145,10 +95,7 @@ const TOAST_ICONS = {
             </svg>`,
 };
 
-
-/* ─────────────────────────────────────────
-   MOODS
-───────────────────────────────────────── */
+// mood presets
 const MOODS = [
   {
     id:          'chill',
@@ -187,17 +134,14 @@ const MOODS = [
   },
 ];
 
-
-/* ─────────────────────────────────────────
-   STATE
-───────────────────────────────────────── */
+// app state
 const state = {
-  games:        [],
-  nextPageUrl:  null,
-  totalCount:   0,
-  isLoading:    false,
-  hero:         { games: [], index: 0, timer: null },
-  activeMood:   null,
+  games: [],
+  nextPageUrl: null,
+  totalCount: 0,
+  isLoading: false,
+  hero: { games: [], index: 0, timer: null },
+  activeMood: null,
   filters: {
     search: '', genre: '', genres: [], platform: '', minRating: 0,
     yearFrom: '', yearTo: '', ordering: DEFAULT_ORDERING, multiplayer: false,
@@ -207,105 +151,100 @@ const state = {
 const detailCache = new Map(); // gameId → { detail, screenshots }
 
 const panelState = {
-  gameId:          null,
+  gameId: null,
   screenshotIndex: 0,
-  screenshots:     [],
-  triggerElement:  null,
-  currentGame:     null,
+  screenshots: [],
+  triggerElement: null,
+  currentGame: null,
 };
 
-// Phase 6: My List
 let myList         = [];   // in-memory copy of localStorage array
 let drawerTrigger  = null; // element to restore focus to when drawer closes
 
-
-/* ─────────────────────────────────────────
-   DOM REFS
-───────────────────────────────────────── */
+// dom refs
 const $ = id => document.getElementById(id);
 
 const dom = {
   // Hero
-  heroBackdropImg:  $('hero-backdrop-img'),
-  heroCoverImg:     $('hero-cover-img'),
-  heroEyebrow:      $('hero-eyebrow'),
-  heroTitle:        $('hero-title'),
-  heroDescription:  $('hero-description'),
-  heroDetailBtn:    $('hero-detail-btn'),
-  heroRatingScore:  $('hero-rating-score'),
-  heroPlatforms:    $('hero-platforms'),
-  heroGenre:        $('hero-genre'),
-  heroDots:         $('hero-dots'),
-  heroPrevBtn:      $('hero-prev-btn'),
-  heroNextBtn:      $('hero-next-btn'),
+  heroBackdropImg: $('hero-backdrop-img'),
+  heroCoverImg: $('hero-cover-img'),
+  heroEyebrow: $('hero-eyebrow'),
+  heroTitle: $('hero-title'),
+  heroDescription: $('hero-description'),
+  heroDetailBtn: $('hero-detail-btn'),
+  heroRatingScore: $('hero-rating-score'),
+  heroPlatforms: $('hero-platforms'),
+  heroGenre: $('hero-genre'),
+  heroDots: $('hero-dots'),
+  heroPrevBtn: $('hero-prev-btn'),
+  heroNextBtn: $('hero-next-btn'),
   heroProgressFill: $('hero-progress-fill'),
 
   // Results
-  gameGrid:        $('game-grid'),
-  resultsHeading:  $('results-heading'),
-  resultsCount:    $('results-count'),
-  loadMoreWrap:    $('load-more-wrap'),
-  loadMoreBtn:     $('load-more-btn'),
+  gameGrid: $('game-grid'),
+  resultsHeading: $('results-heading'),
+  resultsCount: $('results-count'),
+  loadMoreWrap: $('load-more-wrap'),
+  loadMoreBtn: $('load-more-btn'),
 
   // UI states
-  emptyState:   $('empty-state'),
-  errorState:   $('error-state'),
+  emptyState: $('empty-state'),
+  errorState: $('error-state'),
   errorMessage: $('error-message'),
-  retryBtn:     $('retry-btn'),
-  resetAllBtn:  $('reset-all-btn'),
+  retryBtn: $('retry-btn'),
+  resetAllBtn: $('reset-all-btn'),
 
   // Filters
-  searchInput:       $('search-input'),
-  searchClearBtn:    $('search-clear-btn'),
-  filterGenre:       $('filter-genre'),
-  filterPlatform:    $('filter-platform'),
-  filterRating:      $('filter-rating'),
-  ratingDisplay:     $('rating-range-display'),
-  filterYearFrom:    $('filter-year-from'),
-  filterYearTo:      $('filter-year-to'),
-  filterOrdering:    $('filter-ordering'),
+  searchInput: $('search-input'),
+  searchClearBtn: $('search-clear-btn'),
+  filterGenre: $('filter-genre'),
+  filterPlatform: $('filter-platform'),
+  filterRating: $('filter-rating'),
+  ratingDisplay: $('rating-range-display'),
+  filterYearFrom: $('filter-year-from'),
+  filterYearTo: $('filter-year-to'),
+  filterOrdering: $('filter-ordering'),
   filterMultiplayer: $('filter-multiplayer'),
-  clearFiltersBtn:   $('clear-filters-btn'),
-  activeFilters:     $('active-filters'),
+  clearFiltersBtn: $('clear-filters-btn'),
+  activeFilters: $('active-filters'),
 
   // Layout / overlay
-  sidebar:         $('sidebar'),
-  overlay:         $('overlay'),
+  sidebar: $('sidebar'),
+  overlay: $('overlay'),
   mobileFilterBtn: $('mobile-filter-btn'),
-  menuToggleBtn:   $('menu-toggle-btn'),   // Phase 7: hamburger nav button
+  menuToggleBtn: $('menu-toggle-btn'),
 
   // Detail panel
-  detailPanel:           $('detail-panel'),
-  panelCloseBtn:         $('panel-close-btn'),
+  detailPanel: $('detail-panel'),
+  panelCloseBtn: $('panel-close-btn'),
   panelScreenshotsTrack: $('panel-screenshots-track'),
-  screenshotPrevBtn:     $('screenshot-prev-btn'),
-  screenshotNextBtn:     $('screenshot-next-btn'),
-  screenshotDots:        $('screenshot-dots'),
-  panelTitle:            $('panel-title'),
-  panelSaveBtn:          $('panel-save-btn'),
-  panelMetacritic:       $('panel-metacritic'),
-  panelMetacriticScore:  $('panel-metacritic-score'),
-  panelStars:            $('panel-stars'),
-  panelRatingText:       $('panel-rating-text'),
-  panelChips:            $('panel-chips'),
-  panelDescription:      $('panel-description'),
-  panelDescriptionText:  $('panel-description-text'),
-  panelReadMoreBtn:      $('panel-read-more-btn'),
-  panelPlatformList:     $('panel-platform-list'),
-  panelGenreTags:        $('panel-genre-tags'),
-  panelDetailsList:      $('panel-details-list'),
+  screenshotPrevBtn: $('screenshot-prev-btn'),
+  screenshotNextBtn: $('screenshot-next-btn'),
+  screenshotDots: $('screenshot-dots'),
+  panelTitle: $('panel-title'),
+  panelSaveBtn: $('panel-save-btn'),
+  panelMetacritic: $('panel-metacritic'),
+  panelMetacriticScore: $('panel-metacritic-score'),
+  panelStars: $('panel-stars'),
+  panelRatingText: $('panel-rating-text'),
+  panelChips: $('panel-chips'),
+  panelDescription: $('panel-description'),
+  panelDescriptionText: $('panel-description-text'),
+  panelReadMoreBtn: $('panel-read-more-btn'),
+  panelPlatformList: $('panel-platform-list'),
+  panelGenreTags: $('panel-genre-tags'),
+  panelDetailsList: $('panel-details-list'),
 
   // My List drawer
-  mylistDrawer:      $('my-list-drawer'),
-  mylistCloseBtn:    $('mylist-close-btn'),
-  mylistItems:       $('mylist-items'),
-  mylistEmpty:       $('mylist-empty'),
+  mylistDrawer: $('my-list-drawer'),
+  mylistCloseBtn: $('mylist-close-btn'),
+  mylistItems: $('mylist-items'),
+  mylistEmpty: $('mylist-empty'),
   mylistDrawerCount: $('mylist-drawer-count'),
-  mylistBtn:         $('mylist-btn'),
-  mylistCount:       $('mylist-count'),
-  navMylistLink:     $('nav-mylist-link'),
+  mylistBtn: $('mylist-btn'),
+  mylistCount: $('mylist-count'),
+  navMylistLink: $('nav-mylist-link'),
 
-  // Phase 7: toast container
   toastContainer: $('toast-container'),
 
   // Surprise Me
@@ -323,10 +262,7 @@ const dom = {
   compareModalClose: $('compare-modal-close'),
 };
 
-
-/* ─────────────────────────────────────────
-   UTILITIES
-───────────────────────────────────────── */
+// utilities
 
 function debounce(fn, delay) {
   let timer;
@@ -370,7 +306,6 @@ function esc(str) {
   return el.innerHTML;
 }
 
-/** Fisher-Yates shuffle — returns a new array, does not mutate the original. */
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -380,17 +315,13 @@ function shuffle(arr) {
   return a;
 }
 
-/* Phase 7: truncate long strings for toast messages */
 function truncate(str, max = 40) {
   if (!str) return '';
   return str.length > max ? str.slice(0, max).trimEnd() + '…' : str;
 }
 
-/* ─────────────────────────────────────────
-   SEARCH RELEVANCE RE-RANKING
-───────────────────────────────────────── */
+// search ranking
 
-/** Lowercase, collapse punctuation to spaces, trim. */
 function normalizeForSearch(str) {
   return str
     .toLowerCase()
@@ -399,7 +330,7 @@ function normalizeForSearch(str) {
     .trim();
 }
 
-// Titles containing these words are penalised as derivative/low-quality.
+// skip derivative titles in search results
 const DERIVATIVE_KEYWORDS = new Set([
   'pack', 'picture', 'pictures', 'demo', 'wallpaper', 'wallpapers',
   'mod', 'simulator', 'clicker',
@@ -409,20 +340,6 @@ function isDerivativeTitle(normalizedTitle) {
   return normalizedTitle.split(' ').some(w => DERIVATIVE_KEYWORDS.has(w));
 }
 
-/**
- * Returns a relevance score for a title against the query. Lower = better.
- *
- * Base scores:
- *   0  — exact match
- *   1  — title starts with the full query
- *   2  — title contains the full query as a phrase
- *   3  — title contains every query word (multi-word queries only)
- *   99 — no meaningful match (always filtered)
- *
- * A derivative-keyword penalty of +5 is added to scores 1-3 so that
- * "Fortnite Pack" (score 6) sorts after "Fortnite Creative" (score 1)
- * and can be cut entirely for focused single-word searches.
- */
 function scoreTitle(title, rawQuery) {
   const q          = normalizeForSearch(rawQuery);
   const t          = normalizeForSearch(title);
@@ -438,18 +355,6 @@ function scoreTitle(title, rawQuery) {
   return 99;
 }
 
-/**
- * Re-ranks results by title relevance and applies tiered filtering.
- *
- * Filtering thresholds:
- *  - Score 99 is always removed (no meaningful match).
- *  - For single-word specific queries (≥3 chars, no spaces), scores ≥6
- *    are also removed — this cuts derivative titles like "Fortnite Pack"
- *    while keeping clean matches like "Fortnite: Battle Royale".
- *  - For multi-word queries, derivatives are kept but sorted to the bottom.
- *
- * Safety fallback: if filtering empties the page, all non-99 results are kept.
- */
 function rerankBySearchRelevance(games, query) {
   if (!query || query.trim().length < 2) return games;
 
@@ -468,7 +373,7 @@ function rerankBySearchRelevance(games, query) {
     return true;
   });
 
-  // Safety: never return an empty page purely due to client-side filtering
+  // don't return an empty page from client-side filtering
   const pool = filtered.length > 0
     ? filtered
     : scored.filter(({ score }) => score < 99);
@@ -478,10 +383,7 @@ function rerankBySearchRelevance(games, query) {
     .map(({ game }) => game);
 }
 
-
-/* ─────────────────────────────────────────
-   TOAST NOTIFICATIONS  (Phase 7)
-───────────────────────────────────────── */
+// toast notifications
 
 function showToast(message, type = 'info', duration = TOAST_DURATION) {
   const toast = document.createElement('div');
@@ -499,14 +401,10 @@ function showToast(message, type = 'info', duration = TOAST_DURATION) {
   };
 
   const timer = setTimeout(dismiss, duration);
-  // Clicking the toast dismisses it immediately
   toast.addEventListener('click', () => { clearTimeout(timer); dismiss(); }, { once: true });
 }
 
-
-/* ─────────────────────────────────────────
-   API HELPERS
-───────────────────────────────────────── */
+// api helpers
 
 function buildGamesUrl() {
   const url = new URL(`${BASE_URL}/games`);
@@ -535,10 +433,7 @@ async function apiFetch(url) {
   return res.json();
 }
 
-
-/* ─────────────────────────────────────────
-   MY LIST — localStorage & in-memory ops
-───────────────────────────────────────── */
+// my list - storage
 
 function loadMyList() {
   try {
@@ -560,7 +455,6 @@ function isInMyList(gameId) {
   return myList.some(g => g.id === gameId);
 }
 
-/** Strip the game object down to only what the drawer and panel need. */
 function pickSaveData(game) {
   return {
     id:               game.id,
@@ -577,28 +471,24 @@ function pickSaveData(game) {
 
 function addToMyList(game) {
   if (isInMyList(game.id)) return;
-  myList.unshift(pickSaveData(game)); // newest first
+  myList.unshift(pickSaveData(game));
   saveMyList();
   syncMyListUI();
-  showToast(`"${truncate(game.name)}" added to My List`, 'success'); // Phase 7
+  showToast(`"${truncate(game.name)}" added to My List`, 'success');
 }
 
 function removeFromMyList(gameId) {
-  const game = myList.find(g => g.id === gameId); // Phase 7: capture name before removal
+  const game = myList.find(g => g.id === gameId);
   myList = myList.filter(g => g.id !== gameId);
   saveMyList();
   syncMyListUI();
-  if (game) showToast(`"${truncate(game.name)}" removed from My List`, 'info'); // Phase 7
+  if (game) showToast(`"${truncate(game.name)}" removed from My List`, 'info');
 }
 
 function toggleMyList(game) {
   isInMyList(game.id) ? removeFromMyList(game.id) : addToMyList(game);
 }
 
-/**
- * Central sync: call after every My List mutation.
- * Updates all four surfaces that reflect saved state.
- */
 function syncMyListUI() {
   updateNavBadge();
   renderMyListDrawer();
@@ -606,10 +496,7 @@ function syncMyListUI() {
   syncCardSavedStates();
 }
 
-
-/* ─────────────────────────────────────────
-   MY LIST — navbar badge
-───────────────────────────────────────── */
+// my list - nav badge
 
 function updateNavBadge() {
   const count = myList.length;
@@ -617,15 +504,12 @@ function updateNavBadge() {
   dom.mylistCount.hidden = count === 0;
 }
 
-
-/* ─────────────────────────────────────────
-   MY LIST — drawer
-───────────────────────────────────────── */
+// my list - drawer
 
 function openMyListDrawer() {
   drawerTrigger = document.activeElement;
 
-  renderMyListDrawer(); // always fresh before showing
+  renderMyListDrawer();
   dom.mylistDrawer.classList.add('mylist-drawer--open');
   dom.mylistDrawer.setAttribute('aria-hidden', 'false');
   dom.mylistBtn.setAttribute('aria-expanded', 'true');
@@ -716,22 +600,15 @@ function buildMyListItem(game) {
   return li;
 }
 
+// my list - card sync
 
-/* ─────────────────────────────────────────
-   MY LIST — card grid sync
-───────────────────────────────────────── */
-
-/** Toggle .game-card--saved on every visible card to match current myList. */
 function syncCardSavedStates() {
   dom.gameGrid.querySelectorAll('.game-card').forEach(card => {
     card.classList.toggle('game-card--saved', isInMyList(Number(card.dataset.gameId)));
   });
 }
 
-
-/* ─────────────────────────────────────────
-   SKELETON CARDS
-───────────────────────────────────────── */
+// skeleton cards
 
 function showSkeletons(count = PAGE_SIZE) {
   dom.gameGrid.setAttribute('aria-busy', 'true');
@@ -747,10 +624,7 @@ function showSkeletons(count = PAGE_SIZE) {
   `).join('');
 }
 
-
-/* ─────────────────────────────────────────
-   GAME CARDS
-───────────────────────────────────────── */
+// game cards
 
 function buildGameCard(game) {
   const score     = game.metacritic;
@@ -830,10 +704,7 @@ function appendCards(games) {
   }
 }
 
-
-/* ─────────────────────────────────────────
-   HERO CAROUSEL
-───────────────────────────────────────── */
+// hero carousel
 
 function paintHeroSlide(game) {
   const score     = game.metacritic;
@@ -919,10 +790,7 @@ function initHero(games) {
   startHeroTimer();
 }
 
-
-/* ─────────────────────────────────────────
-   DETAIL PANEL
-───────────────────────────────────────── */
+// detail panel
 
 async function openDetailPanel(game) {
   panelState.triggerElement  = document.activeElement;
@@ -1036,10 +904,7 @@ function populatePanelFull(detail, screenshots) {
   renderDetailsTable(detail);
 }
 
-
-/* ─────────────────────────────────────────
-   SCREENSHOT CAROUSEL
-───────────────────────────────────────── */
+// screenshot carousel
 
 function renderScreenshots(screenshots) {
   if (!screenshots.length) return;
@@ -1086,16 +951,11 @@ function goToScreenshot(index) {
   });
 }
 
-
-/* ─────────────────────────────────────────
-   PANEL CONTENT HELPERS
-───────────────────────────────────────── */
+// panel helpers
 
 function renderStars(rating) {
   if (!rating) return '';
   const filled = Math.round(rating);
-  // Phase 7 fix: was var(--color-rating-gold) which is not defined in CSS;
-  // using var(--color-rating-good) (yellow) which is the correct token.
   return Array.from({ length: 5 }, (_, i) =>
     `<span style="color:${i < filled ? 'var(--color-rating-good)' : 'var(--color-text-muted)'}">★</span>`
   ).join('');
@@ -1157,7 +1017,6 @@ function initReadMore(description) {
   }
 }
 
-/** Sync the panel save button to the current saved state from myList. */
 function updatePanelSaveBtn(gameId) {
   if (!gameId) return;
   const saved = isInMyList(gameId);
@@ -1167,10 +1026,7 @@ function updatePanelSaveBtn(gameId) {
   if (label) label.textContent = saved ? 'Saved' : 'Add to My List';
 }
 
-
-/* ─────────────────────────────────────────
-   FILTER STATE SYNC
-───────────────────────────────────────── */
+// filter state
 
 function syncFiltersFromDOM() {
   state.filters.genre       = dom.filterGenre.value;
@@ -1196,10 +1052,7 @@ function syncFiltersToDom() {
   dom.searchClearBtn.hidden     = !state.filters.search;
 }
 
-
-/* ─────────────────────────────────────────
-   YEAR DROPDOWNS
-───────────────────────────────────────── */
+// year dropdowns
 
 function populateYearDropdowns() {
   const currentYear = new Date().getFullYear();
@@ -1209,10 +1062,7 @@ function populateYearDropdowns() {
   }
 }
 
-
-/* ─────────────────────────────────────────
-   ACTIVE FILTER PILLS
-───────────────────────────────────────── */
+// filter pills
 
 function hasActiveFilters() {
   const f = state.filters;
@@ -1279,10 +1129,7 @@ function clearAllFilters() {
   triggerLoad();
 }
 
-
-/* ─────────────────────────────────────────
-   RESULTS HEADING & COUNT
-───────────────────────────────────────── */
+// results heading
 
 function updateResultsHeading() {
   const f = state.filters;
@@ -1303,10 +1150,7 @@ function updateResultsCount() {
     ? `${state.totalCount.toLocaleString()} games` : '';
 }
 
-
-/* ─────────────────────────────────────────
-   UI STATE HELPERS
-───────────────────────────────────────── */
+// ui helpers
 
 function showEmptyState() {
   dom.emptyState.style.display   = 'flex';
@@ -1339,10 +1183,7 @@ function setLoadMoreBusy(busy) {
   if (spinnerEl) spinnerEl.hidden   = !busy;
 }
 
-
-/* ─────────────────────────────────────────
-   DATA LOADING
-───────────────────────────────────────── */
+// load games
 
 async function loadGames() {
   if (state.isLoading) return;
@@ -1392,7 +1233,7 @@ async function loadMore() {
     dom.loadMoreWrap.style.display = state.nextPageUrl ? 'flex' : 'none';
   } catch (err) {
     console.error('loadMore failed:', err);
-    showToast('Failed to load more games. Please try again.', 'error'); // Phase 7
+    showToast('Failed to load more games. Please try again.', 'error');
   } finally {
     state.isLoading = false;
     setLoadMoreBusy(false);
@@ -1404,10 +1245,7 @@ function triggerLoad() {
   loadGames();
 }
 
-
-/* ─────────────────────────────────────────
-   FILTER INITIALISATION
-───────────────────────────────────────── */
+// filter setup
 
 const debouncedSearch = debounce(() => {
   state.filters.search = dom.searchInput.value.trim();
@@ -1463,10 +1301,7 @@ function initFilters() {
   dom.clearFiltersBtn.addEventListener('click', clearAllFilters);
 }
 
-
-/* ─────────────────────────────────────────
-   MOBILE SIDEBAR & OVERLAY
-───────────────────────────────────────── */
+// mobile sidebar
 
 function openMobileSidebar() {
   dom.sidebar.classList.add('sidebar--mobile-open');
@@ -1491,10 +1326,7 @@ function closeActiveOverlay() {
   dom.overlay.classList.remove('overlay--active');
 }
 
-
-/* ─────────────────────────────────────────
-   MOOD DISCOVERY
-───────────────────────────────────────── */
+// mood discovery
 
 function renderMoodCards() {
   if (!dom.moodCards) return;
@@ -1538,10 +1370,7 @@ function applyMood(mood) {
   triggerLoad();
 }
 
-
-/* ─────────────────────────────────────────
-   SURPRISE ME
-───────────────────────────────────────── */
+// surprise me
 
 async function surpriseMe() {
   const btn = dom.surpriseBtn;
@@ -1569,10 +1398,7 @@ async function surpriseMe() {
   }
 }
 
-
-/* ─────────────────────────────────────────
-   GAME COMPARISON
-───────────────────────────────────────── */
+// game comparison
 
 let compareList = []; // max 2 game objects
 
@@ -1762,10 +1588,7 @@ function renderCompareModalContent(g1, g2, d1, d2) {
   `;
 }
 
-
-/* ─────────────────────────────────────────
-   MY LIST — init
-───────────────────────────────────────── */
+// my list init
 
 function initMyList() {
   myList = loadMyList();
@@ -1773,10 +1596,7 @@ function initMyList() {
   // Drawer renders on open, not here
 }
 
-
-/* ─────────────────────────────────────────
-   EVENTS
-───────────────────────────────────────── */
+// events
 
 function initEvents() {
   // Surprise Me
@@ -1802,7 +1622,6 @@ function initEvents() {
   // Hero "View Details"
   dom.heroDetailBtn.addEventListener('click', () => {
     const id = Number(dom.heroDetailBtn.dataset.gameId);
-    // Phase 7 fix: fall back to hero.games in case filters changed state.games
     const game = state.games.find(g => g.id === id)
               || state.hero.games.find(g => g.id === id);
     if (game) openDetailPanel(game);
@@ -1849,7 +1668,6 @@ function initEvents() {
       : openMobileSidebar();
   });
 
-  // Phase 7: wire up the navbar hamburger button (was present in HTML but had no handler)
   if (dom.menuToggleBtn) {
     dom.menuToggleBtn.addEventListener('click', () => {
       dom.sidebar.classList.contains('sidebar--mobile-open')
@@ -1871,7 +1689,6 @@ function initEvents() {
       closeActiveOverlay();
       return;
     }
-    // Phase 7 fix: only navigate screenshots when multiple exist
     const panelOpen = dom.detailPanel.classList.contains('detail-panel--open');
     if (panelOpen && panelState.screenshots.length > 1) {
       if (e.key === 'ArrowRight') { e.preventDefault(); goToScreenshot(panelState.screenshotIndex + 1); }
@@ -1880,10 +1697,7 @@ function initEvents() {
   });
 }
 
-
-/* ─────────────────────────────────────────
-   INIT
-───────────────────────────────────────── */
+// init
 
 document.addEventListener('DOMContentLoaded', () => {
   initMyList();  // load persisted list before anything renders

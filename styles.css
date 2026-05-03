@@ -1,62 +1,56 @@
-/* ══════════════════════════════════════════════════════════════════
-   NEXUS — GAME DISCOVERY PLATFORM
-   styles.css
-   ══════════════════════════════════════════════════════════════════ */
+/* Nexus - Game Discovery styles */
 
-
-/* ─────────────────────────────────────────
-   1. DESIGN TOKENS
-───────────────────────────────────────── */
+/* design tokens */
 :root {
   /* Background scale */
-  --color-bg:           #0a0a0f;
-  --color-surface:      #12121a;
-  --color-elevated:     #1a1a28;
-  --color-elevated-2:   #222236;
+  --color-bg: #0a0a0f;
+  --color-surface: #12121a;
+  --color-elevated: #1a1a28;
+  --color-elevated-2: #222236;
 
   /* Borders */
-  --color-border:        rgba(255, 255, 255, 0.07);
+  --color-border: rgba(255, 255, 255, 0.07);
   --color-border-strong: rgba(255, 255, 255, 0.13);
 
   /* Accent – violet */
-  --color-accent:        #6c63ff;
-  --color-accent-hover:  #7b73ff;
-  --color-accent-dim:    rgba(108, 99, 255, 0.12);
-  --color-accent-glow:   rgba(108, 99, 255, 0.28);
+  --color-accent: #6c63ff;
+  --color-accent-hover: #7b73ff;
+  --color-accent-dim: rgba(108, 99, 255, 0.12);
+  --color-accent-glow: rgba(108, 99, 255, 0.28);
 
   /* Secondary accent – coral */
-  --color-secondary:     #ff6584;
+  --color-secondary: #ff6584;
   --color-secondary-dim: rgba(255, 101, 132, 0.12);
 
   /* Text */
-  --color-text-primary:   #f0f0f5;
+  --color-text-primary: #f0f0f5;
   --color-text-secondary: #9090a8;
-  --color-text-muted:     #55556a;
+  --color-text-muted: #55556a;
 
   /* Rating colours */
-  --color-rating-great:  #3ddc84;
-  --color-rating-good:   #f4c542;
-  --color-rating-mixed:  #ff9a3c;
-  --color-rating-poor:   #ff5a5f;
+  --color-rating-great: #3ddc84;
+  --color-rating-good: #f4c542;
+  --color-rating-mixed: #ff9a3c;
+  --color-rating-poor: #ff5a5f;
 
   /* Status */
   --color-success: #3ddc84;
-  --color-error:   #ff5a5f;
+  --color-error: #ff5a5f;
 
   /* Fonts */
   --font-display: 'Syne',          system-ui, sans-serif;
-  --font-body:    'Inter',         system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono','Courier New', monospace;
+  --font-body: 'Inter',         system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono','Courier New', monospace;
 
   /* Spacing (4 px base) */
-  --sp-1:  4px;
-  --sp-2:  8px;
-  --sp-3:  12px;
-  --sp-4:  16px;
-  --sp-5:  20px;
-  --sp-6:  24px;
-  --sp-8:  32px;
-  --sp-9:  36px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-9: 36px;
   --sp-10: 40px;
   --sp-12: 48px;
   --sp-16: 64px;
@@ -64,38 +58,35 @@
   --sp-24: 96px;
 
   /* Radii */
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
-  --radius-xl:   20px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* Transitions */
-  --t-fast:   150ms ease;
-  --t-base:   220ms ease;
-  --t-slow:   350ms ease;
-  --t-panel:  340ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 150ms ease;
+  --t-base: 220ms ease;
+  --t-slow: 350ms ease;
+  --t-panel: 340ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Shadows */
-  --shadow-card:       0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.5);
   --shadow-card-hover: 0 12px 48px rgba(0, 0, 0, 0.65);
-  --shadow-panel:      -20px 0 60px rgba(0, 0, 0, 0.5);
-  --shadow-drawer:      20px 0 60px rgba(0, 0, 0, 0.5);
-  --shadow-accent:     0 6px 28px var(--color-accent-glow);
+  --shadow-panel: -20px 0 60px rgba(0, 0, 0, 0.5);
+  --shadow-drawer: 20px 0 60px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 6px 28px var(--color-accent-glow);
 
   /* Layout */
-  --navbar-h:     68px;
-  --sidebar-w:    248px;
-  --panel-w:      480px;
-  --drawer-w:     360px;
-  --max-w:        1400px;
-  --page-px:      var(--sp-6);
+  --navbar-h: 68px;
+  --sidebar-w: 248px;
+  --panel-w: 480px;
+  --drawer-w: 360px;
+  --max-w: 1400px;
+  --page-px: var(--sp-6);
 }
 
-
-/* ─────────────────────────────────────────
-   2. RESET & BASE
-───────────────────────────────────────── */
+/* 2. reset & base */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -135,10 +126,7 @@ a { color: inherit; text-decoration: none; }
 
 select, input { font-family: inherit; font-size: inherit; }
 
-
-/* ─────────────────────────────────────────
-   3. UTILITIES
-───────────────────────────────────────── */
+/* 3. utilities */
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -157,10 +145,7 @@ select, input { font-family: inherit; font-size: inherit; }
   border-radius: var(--radius-sm);
 }
 
-
-/* ─────────────────────────────────────────
-   4. SCROLLBAR
-───────────────────────────────────────── */
+/* 4. scrollbar */
 ::-webkit-scrollbar        { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track  { background: transparent; }
 ::-webkit-scrollbar-thumb  {
@@ -169,10 +154,7 @@ select, input { font-family: inherit; font-size: inherit; }
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.20); }
 
-
-/* ─────────────────────────────────────────
-   5. OVERLAY
-───────────────────────────────────────── */
+/* 5. overlay */
 .overlay {
   position: fixed;
   inset: 0;
@@ -189,10 +171,7 @@ select, input { font-family: inherit; font-size: inherit; }
   pointer-events: all;
 }
 
-
-/* ─────────────────────────────────────────
-   6. NAVBAR
-───────────────────────────────────────── */
+/* 6. navbar */
 .navbar {
   position: sticky;
   top: 0;
@@ -393,10 +372,7 @@ select, input { font-family: inherit; font-size: inherit; }
 }
 .navbar__menu-toggle:hover .navbar__menu-bar { background: var(--color-text-primary); }
 
-
-/* ─────────────────────────────────────────
-   7. HERO
-───────────────────────────────────────── */
+/* 7. hero */
 .hero {
   position: relative;
   min-height: 88vh;
@@ -688,10 +664,7 @@ select, input { font-family: inherit; font-size: inherit; }
   transition: width linear;
 }
 
-
-/* ─────────────────────────────────────────
-   8. MAIN LAYOUT
-───────────────────────────────────────── */
+/* 8. main layout */
 .main {
   display: flex;
   align-items: flex-start;
@@ -702,10 +675,7 @@ select, input { font-family: inherit; font-size: inherit; }
   min-height: 60vh;
 }
 
-
-/* ─────────────────────────────────────────
-   9. SIDEBAR
-───────────────────────────────────────── */
+/* 9. sidebar */
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
@@ -956,10 +926,7 @@ select, input { font-family: inherit; font-size: inherit; }
   outline-offset: 2px;
 }
 
-
-/* ─────────────────────────────────────────
-   10. GAME SECTION HEADER
-───────────────────────────────────────── */
+/* 10. game section header */
 .game-section { flex: 1; min-width: 0; }
 
 .game-section__header {
@@ -1006,10 +973,7 @@ select, input { font-family: inherit; font-size: inherit; }
   color: var(--color-text-primary);
 }
 
-
-/* ─────────────────────────────────────────
-   MOOD DISCOVERY
-───────────────────────────────────────── */
+/* mood discovery */
 .mood-section {
   margin-bottom: var(--sp-6);
 }
@@ -1069,20 +1033,14 @@ select, input { font-family: inherit; font-size: inherit; }
 }
 @media (min-width: 700px) { .mood-card__desc { display: block; } }
 
-
-/* ─────────────────────────────────────────
-   11. GAME GRID
-───────────────────────────────────────── */
+/* 11. game grid */
 .game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--sp-5);
 }
 
-
-/* ─────────────────────────────────────────
-   12. GAME CARD
-───────────────────────────────────────── */
+/* 12. game card */
 .game-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -1258,10 +1216,7 @@ select, input { font-family: inherit; font-size: inherit; }
   white-space: nowrap;
 }
 
-
-/* ─────────────────────────────────────────
-   13. SKELETON CARDS
-───────────────────────────────────────── */
+/* 13. skeleton cards */
 .skeleton-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -1314,10 +1269,7 @@ select, input { font-family: inherit; font-size: inherit; }
   to   { background-position: -200% 0; }
 }
 
-
-/* ─────────────────────────────────────────
-   14. EMPTY & ERROR STATES
-───────────────────────────────────────── */
+/* 14. empty & error states */
 .empty-state,
 .error-state {
   display: flex;
@@ -1364,10 +1316,7 @@ select, input { font-family: inherit; font-size: inherit; }
   box-shadow: var(--shadow-accent);
 }
 
-
-/* ─────────────────────────────────────────
-   15. LOAD MORE
-───────────────────────────────────────── */
+/* load more button */
 .load-more-wrap {
   display: flex;
   justify-content: center;
@@ -1404,10 +1353,7 @@ select, input { font-family: inherit; font-size: inherit; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-
-/* ─────────────────────────────────────────
-   16. FOOTER
-───────────────────────────────────────── */
+/* 16. footer */
 .footer {
   border-top: 1px solid var(--color-border);
   padding: var(--sp-10) var(--page-px);
@@ -1453,10 +1399,7 @@ select, input { font-family: inherit; font-size: inherit; }
 }
 .footer__link:hover { color: var(--color-accent); }
 
-
-/* ─────────────────────────────────────────
-   17. DETAIL PANEL
-───────────────────────────────────────── */
+/* 17. detail panel */
 .detail-panel {
   position: fixed;
   top: 0; right: 0; bottom: 0;
@@ -1784,10 +1727,7 @@ select, input { font-family: inherit; font-size: inherit; }
   color: var(--color-text-secondary);
 }
 
-
-/* ─────────────────────────────────────────
-   18. MY LIST DRAWER
-───────────────────────────────────────── */
+/* 18. my list drawer */
 .mylist-drawer {
   position: fixed;
   top: 0; left: 0; bottom: 0;
@@ -1950,10 +1890,7 @@ select, input { font-family: inherit; font-size: inherit; }
   line-height: 1.65;
 }
 
-
-/* ─────────────────────────────────────────
-   19. TOAST NOTIFICATIONS
-───────────────────────────────────────── */
+/* 19. toast notifications */
 .toast-container {
   position: fixed;
   bottom: var(--sp-6);
@@ -2002,20 +1939,14 @@ select, input { font-family: inherit; font-size: inherit; }
   to   { opacity: 0; transform: translateY(8px) scale(0.94); }
 }
 
-
-/* ─────────────────────────────────────────
-   20. RESPONSIVE — TABLET (600px+)
-───────────────────────────────────────── */
+/* 20. responsive — tablet (600px+) */
 @media (min-width: 600px) {
   .navbar__mylist-label { display: inline; }
   .hero__cover-wrap     { display: block; }
   .hero__content        { max-width: 260px; }
 }
 
-
-/* ─────────────────────────────────────────
-   21. RESPONSIVE — LAPTOP (900px+)
-───────────────────────────────────────── */
+/* 21. responsive — laptop (900px+) */
 @media (min-width: 900px) {
   .navbar__nav              { display: flex; }
   .navbar__menu-toggle      { display: none; }
@@ -2026,10 +1957,7 @@ select, input { font-family: inherit; font-size: inherit; }
   .navbar__surprise-btn     { padding: 0 var(--sp-4); }
 }
 
-
-/* ─────────────────────────────────────────
-   22. RESPONSIVE — DESKTOP (1200px+)
-───────────────────────────────────────── */
+/* 22. responsive — desktop (1200px+) */
 @media (min-width: 1200px) {
   :root { --page-px: 40px; }
 
@@ -2040,10 +1968,7 @@ select, input { font-family: inherit; font-size: inherit; }
   }
 }
 
-
-/* ─────────────────────────────────────────
-   23. MOBILE SIDEBAR OVERLAY (< 900px)
-───────────────────────────────────────── */
+/* mobile sidebar overlay */
 @media (max-width: 899px) {
   .sidebar {
     display: flex;
@@ -2063,10 +1988,7 @@ select, input { font-family: inherit; font-size: inherit; }
   .sidebar--mobile-open { transform: translateX(0); }
 }
 
-
-/* ─────────────────────────────────────────
-   24. REDUCED MOTION
-───────────────────────────────────────── */
+/* reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration:       0.01ms !important;
@@ -2078,10 +2000,7 @@ select, input { font-family: inherit; font-size: inherit; }
   .skeleton-line::after { animation: none; background: none; }
 }
 
-
-/* ─────────────────────────────────────────
-   25. GAME COMPARISON
-───────────────────────────────────────── */
+/* game comparison */
 
 /* Compare toggle button on card image */
 .compare-btn {
