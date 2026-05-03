@@ -1339,7 +1339,9 @@ async function loadGames() {
   try {
     const data  = await apiFetch(buildGamesUrl());
     const raw   = data.results ?? [];
-    state.games       = state.filters.search ? rerankBySearchRelevance(raw, state.filters.search) : raw;
+    state.games       = state.filters.search ? rerankBySearchRelevance(raw, state.filters.search)
+                      : state.activeMood     ? shuffle(raw)
+                      : raw;
     state.nextPageUrl = data.next  ?? null;
     state.totalCount  = data.count ?? 0;
 
