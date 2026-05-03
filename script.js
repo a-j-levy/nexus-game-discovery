@@ -264,6 +264,9 @@ const dom = {
 
   // Phase 7: toast container
   toastContainer: $('toast-container'),
+
+  // Surprise Me
+  surpriseBtn: $('surprise-btn'),
 };
 
 
@@ -1416,6 +1419,37 @@ function closeActiveOverlay() {
 
 
 /* ─────────────────────────────────────────
+   SURPRISE ME
+───────────────────────────────────────── */
+
+async function surpriseMe() {
+  const btn = dom.surpriseBtn;
+  btn.classList.add('navbar__surprise-btn--loading');
+
+  try {
+    const page = Math.floor(Math.random() * 10) + 1;
+    const url  = new URL(`${BASE_URL}/games`);
+    url.searchParams.set('key',        API_KEY);
+    url.searchParams.set('page_size',  20);
+    url.searchParams.set('page',       page);
+    url.searchParams.set('metacritic', '80,100');
+    url.searchParams.set('ordering',   '-rating');
+
+    const data  = await apiFetch(url.toString());
+    const games = data.results ?? [];
+    if (!games.length) { showToast('No surprise found — try again!', 'info'); return; }
+
+    const game = games[Math.floor(Math.random() * games.length)];
+    openDetailPanel(game);
+  } catch {
+    showToast('Could not load a surprise game. Try again.', 'error');
+  } finally {
+    btn.classList.remove('navbar__surprise-btn--loading');
+  }
+}
+
+
+/* ─────────────────────────────────────────
    MY LIST — init
 ───────────────────────────────────────── */
 
@@ -1431,6 +1465,9 @@ function initMyList() {
 ───────────────────────────────────────── */
 
 function initEvents() {
+  // Surprise Me
+  dom.surpriseBtn.addEventListener('click', surpriseMe);
+
   // Grid
   dom.loadMoreBtn.addEventListener('click', loadMore);
   dom.retryBtn.addEventListener('click', loadGames);

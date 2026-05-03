@@ -344,6 +344,33 @@ select, input { font-family: inherit; font-size: inherit; }
   line-height: 1;
 }
 
+/* Surprise Me button */
+.navbar__surprise-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+  padding: 0 var(--sp-3);
+  height: 38px;
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.navbar__surprise-btn:hover {
+  background: var(--color-elevated);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--color-text-primary);
+}
+.navbar__surprise-btn--loading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.navbar__surprise-label { display: none; }
+
 /* Mobile hamburger */
 .navbar__menu-toggle {
   display: flex;
@@ -1932,6 +1959,8 @@ select, input { font-family: inherit; font-size: inherit; }
   .sidebar                  { display: flex; }
   .game-section__filter-toggle { display: none; }
   .hero__content            { max-width: 380px; }
+  .navbar__surprise-label   { display: inline; }
+  .navbar__surprise-btn     { padding: 0 var(--sp-4); }
 }
 
 
